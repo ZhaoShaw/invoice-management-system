@@ -3,5 +3,9 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return (
+    <div className="bg-auth-bg fixed inset-0 bg-center">
+      <div className="">{children}</div>
+    </div>
+  );
 }
