@@ -1,5 +1,6 @@
 import { getServerAuthSession } from "~/server/auth";
 import { redirect } from "next/navigation";
+import { BodyLayout } from "~/components/body-layout";
 
 export default async function Layout({
   children,
@@ -10,5 +11,9 @@ export default async function Layout({
   if (!session) {
     redirect("/login");
   }
-  return <div>{children}</div>;
+  return (
+    <div>
+      <BodyLayout user={session.user} children={children}></BodyLayout>
+    </div>
+  );
 }

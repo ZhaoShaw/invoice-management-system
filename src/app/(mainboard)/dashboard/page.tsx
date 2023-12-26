@@ -1,3 +1,9 @@
 export default function Dashboard() {
-  return <div>Dashboard</div>;
+  return (
+    <div>
+      {[...Array(100).keys()].map((i) => (
+        <div>Dashboard</div>
+      ))}
+    </div>
+  );
 }

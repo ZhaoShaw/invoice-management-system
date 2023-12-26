@@ -29,6 +29,7 @@
     "@trpc/server": "^10.43.6",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "lucide-react": "^0.302.0",
     "next": "^14.0.3",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.9.7",
