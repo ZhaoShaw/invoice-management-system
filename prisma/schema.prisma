@@ -54,15 +54,21 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    role          UserRole  @default(USER)
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id                    String          @id @default(cuid())
+    name                  String?
+    email                 String?         @unique
+    emailVerified         DateTime?
+    image                 String?
+    role                  UserRole        @default(USER)
+    accounts              Account[]
+    sessions              Session[]
+    posts                 Post[]
+    createdInvoiceCommits InvoiceCommit[] @relation("CreatedUser")
+    updatedInvoiceCommits InvoiceCommit[] @relation("UpdatedUser")
+    createdInvoiceGroups  InvoiceGroup[]  @relation("CreatedUser")
+    updatedInvoiceGroups  InvoiceGroup[]  @relation("UpdatedUser")
+    createdInvoiceItems   InvoiceItem[]   @relation("CreatedUser")
+    updatedInvoiceItems   InvoiceItem[]   @relation("UpdatedUser")
 }
 
 enum UserRole {
@@ -76,4 +82,83 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+// Invoice Commit
+model InvoiceCommit {
+    id              String         @id @default(cuid())
+    totalAmount     Decimal        @default(0) @db.Decimal(12, 2)
+    totalGroups     Int            @default(0)
+    totalItems      Int            @default(0)
+    invoiceGroups   InvoiceGroup[]
+    commitStatus    CommitStatus   @default(NOTREVIEWED)
+    commitPeriod    InvoicePeriod  @relation(fields: [invoicePeriodId], references: [id])
+    invoicePeriodId String
+    createdBy       User           @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
+    createdUesrId   String
+    createdAt       DateTime       @default(now())
+    updatedBy       User           @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
+    updatedUesrId   String
+    updatedAt       DateTime       @updatedAt
+}
+
+enum CommitStatus {
+    NOTREVIEWED
+    REVIEWED
+    EXPIRED
+}
+
+// Invoice Group
+
+model InvoiceGroup {
+    id              String        @id @default(cuid())
+    totalAmount     Decimal       @default(0) @db.Decimal(12, 2)
+    totalItems      Int           @default(0)
+    purpose         InvoiceEnum   @relation(fields: [invoiceEnumId], references: [id])
+    invoiceEnumId   String
+    invoiceCommit   InvoiceCommit @relation(fields: [invoiceCommitId], references: [id])
+    invoiceCommitId String
+    invoiceItems    InvoiceItem[]
+    createdBy       User          @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
+    createdUesrId   String
+    createdAt       DateTime      @default(now())
+    updatedBy       User          @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
+    updatedUesrId   String
+    updatedAt       DateTime      @updatedAt
+}
+
+// Invoice Item
+model InvoiceItem {
+    id             String       @id @default(cuid())
+    invoiceItemSrc String       @default("")
+    invoiceGroup   InvoiceGroup @relation(fields: [invoiceGroupId], references: [id])
+    invoiceGroupId String
+    createdBy      User         @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
+    createdUesrId  String
+    createdAt      DateTime     @default(now())
+    updatedBy      User         @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
+    updatedUesrId  String
+    updatedAt      DateTime     @updatedAt
+}
+
+// Invoice Period 
+
+model InvoicePeriod {
+    id              String          @id @default(cuid())
+    canChangeStatus Boolean         @default(false)
+    startAt         DateTime
+    endAt           DateTime
+    createdAt       DateTime        @default(now())
+    InvoiceCommit   InvoiceCommit[]
+}
+
+// Invoice Enum 
+
+model InvoiceEnum {
+    id           String         @id @default(cuid())
+    enumType     String
+    enumName     String
+    enumValue    String
+    createdAt    DateTime       @default(now())
+    InvoiceGroup InvoiceGroup[]
 }
