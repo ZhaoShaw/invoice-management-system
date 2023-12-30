@@ -144,12 +144,11 @@ model InvoiceItem {
 // Invoice Period 
 
 model InvoicePeriod {
-    id              String          @id @default(cuid())
-    canChangeStatus Boolean         @default(false)
-    startAt         DateTime
-    endAt           DateTime
-    createdAt       DateTime        @default(now())
-    InvoiceCommit   InvoiceCommit[]
+    id            String          @id @default(cuid())
+    startAt       DateTime
+    endAt         DateTime
+    createdAt     DateTime        @default(now())
+    InvoiceCommit InvoiceCommit[]
 }
 
 // Invoice Enum 

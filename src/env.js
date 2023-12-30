@@ -34,6 +34,15 @@ export const env = createEnv({
     EMAIL_SERVER_PASSWORD: z.string(),
     EMAIL_FROM: z.string(),
     ADMIN_USER_EMAIL: z.string().email(),
+    INVOICE_PERIOD: z.coerce.number(),
+    INVOICE_START_DAY: z.coerce.number(),
+    INVOICE_START_MONTH: z.coerce.number(),
+    INVOICE_START_YEAR: z.coerce.number(),
+    INVOICE_END_DAY: z.coerce.number(),
+    INVOICE_END_MONTH: z.coerce.number(),
+    INVOICE_END_YEAR: z.coerce.number(),
+    INVOICE_CHANGE_MONTH: z.coerce.number(),
+    INVOICE_CHANGE_DAY: z.coerce.number(),
   },
 
   /**
@@ -60,6 +69,15 @@ export const env = createEnv({
     EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD,
     EMAIL_FROM: process.env.EMAIL_FROM,
     ADMIN_USER_EMAIL: process.env.ADMIN_USER_EMAIL,
+    INVOICE_PERIOD: process.env.INVOICE_PERIOD,
+    INVOICE_START_DAY: process.env.INVOICE_START_DAY,
+    INVOICE_START_MONTH: process.env.INVOICE_START_MONTH,
+    INVOICE_START_YEAR: process.env.INVOICE_START_YEAR,
+    INVOICE_END_DAY: process.env.INVOICE_END_DAY,
+    INVOICE_END_MONTH: process.env.INVOICE_END_MONTH,
+    INVOICE_END_YEAR: process.env.INVOICE_END_YEAR,
+    INVOICE_CHANGE_MONTH: process.env.INVOICE_CHANGE_MONTH,
+    INVOICE_CHANGE_DAY: process.env.INVOICE_CHANGE_DAY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
