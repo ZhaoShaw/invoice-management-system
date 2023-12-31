@@ -111,27 +111,32 @@ enum CommitStatus {
 // Invoice Group
 
 model InvoiceGroup {
-    id              String        @id @default(cuid())
-    totalAmount     Decimal       @default(0) @db.Decimal(12, 2)
-    totalItems      Int           @default(0)
-    purpose         InvoiceEnum   @relation(fields: [invoiceEnumId], references: [id])
-    invoiceEnumId   String
-    invoiceCommit   InvoiceCommit @relation(fields: [invoiceCommitId], references: [id])
+    id              String              @id @default(cuid())
+    totalAmount     Decimal             @default(0) @db.Decimal(12, 2)
+    totalItems      Int                 @default(0)
+    purpose         InvoiceGroupPurpose @default(OTHER)
+    invoiceCommit   InvoiceCommit       @relation(fields: [invoiceCommitId], references: [id], onDelete: Cascade)
     invoiceCommitId String
     invoiceItems    InvoiceItem[]
-    createdBy       User          @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
+    createdBy       User                @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
     createdUesrId   String
-    createdAt       DateTime      @default(now())
-    updatedBy       User          @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
+    createdAt       DateTime            @default(now())
+    updatedBy       User                @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
     updatedUesrId   String
-    updatedAt       DateTime      @updatedAt
+    updatedAt       DateTime            @updatedAt
+}
+
+enum InvoiceGroupPurpose {
+    CATERING
+    TRAFFIC
+    OTHER
 }
 
 // Invoice Item
 model InvoiceItem {
     id             String       @id @default(cuid())
     invoiceItemSrc String       @default("")
-    invoiceGroup   InvoiceGroup @relation(fields: [invoiceGroupId], references: [id])
+    invoiceGroup   InvoiceGroup @relation(fields: [invoiceGroupId], references: [id], onDelete: Cascade)
     invoiceGroupId String
     createdBy      User         @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
     createdUesrId  String
@@ -153,11 +158,11 @@ model InvoicePeriod {
 
 // Invoice Enum 
 
-model InvoiceEnum {
-    id           String         @id @default(cuid())
-    enumType     String
-    enumName     String
-    enumValue    String
-    createdAt    DateTime       @default(now())
-    InvoiceGroup InvoiceGroup[]
-}
+// model InvoiceEnum {
+//     id           String         @id @default(cuid())
+//     enumType     String
+//     enumName     String
+//     enumValue    String
+//     createdAt    DateTime       @default(now())
+//     InvoiceGroup InvoiceGroup[]
+// }

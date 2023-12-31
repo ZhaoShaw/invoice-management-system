@@ -10,7 +10,6 @@ import { AuthStage } from "~/types/index.d";
 import AuthForm from "~/components/auth-form";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { link } from "fs";
 
 type CardProps = React.ComponentProps<typeof Card> & {
   authStage: AuthStage;
