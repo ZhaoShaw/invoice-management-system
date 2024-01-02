@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { UserRole } from "~/types/index.d";
 import { env } from "~/env";
 
@@ -12,6 +16,19 @@ export const userRouter = createTRPCRouter({
           email: env.ADMIN_USER_EMAIL,
         },
         data: { role: input.role },
+      });
+    }),
+  getUserBySessionToken: protectedProcedure
+    .input(
+      z.object({
+        sessionToken: z.string(),
+      }),
+    )
+    .query(({ ctx, input }) => {
+      return ctx.db.session.findFirst({
+        where: {
+          sessionToken: input.sessionToken,
+        },
       });
     }),
 });
