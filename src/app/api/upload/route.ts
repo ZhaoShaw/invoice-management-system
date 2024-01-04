@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { api } from "~/trpc/server";
 import { format } from "date-fns";
 import { fromPath } from "pdf2pic";
+import { v4 as uuidv4 } from "uuid";
 
 const options = {
   density: 100,
@@ -28,20 +29,22 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const formDataEntryValues = Array.from(formData.values());
   for (const formDataEntryValue of formDataEntryValues) {
+    const randomId = uuidv4();
     if (
       typeof formDataEntryValue === "object" &&
       "arrayBuffer" in formDataEntryValue
     ) {
       const file = formDataEntryValue;
       const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(`${userInvoiceDir}/${file.name}`, buffer);
+      const fileExt = file.name.substring(file.name.lastIndexOf("."));
+      fs.writeFileSync(`${userInvoiceDir}/${randomId}${fileExt}`, buffer);
       if (file.name.endsWith(".pdf")) {
         options.savePath = userInvoiceDir;
-        options.saveFilename = file.name.substring(
-          0,
-          file.name.lastIndexOf("."),
+        options.saveFilename = randomId;
+        const convert = fromPath(
+          `${userInvoiceDir}/${randomId}${fileExt}`,
+          options,
         );
-        const convert = fromPath(`${userInvoiceDir}/${file.name}`, options);
         await convert(1, { responseType: "image" });
       }
     }
@@ -59,7 +62,7 @@ export async function GET(req: NextRequest) {
   const date = format(new Date(Date.now()), "yyyy-MM-dd");
   const userInvoiceDir = `public/upload/${user?.userId}/${date}`;
   const files = fs.readdirSync(userInvoiceDir);
-  console.log(files[0]);
+  // console.log(files[0]);
   const filesSrc = files
     .filter(
       (f) =>
@@ -67,6 +70,9 @@ export async function GET(req: NextRequest) {
         f.toLowerCase().endsWith(".jpg") ||
         f.toLowerCase().endsWith(".jpeg"),
     )
-    .map((f) => `/upload/${user?.userId}/${date}/${f}`);
+    .map((f) => ({
+      id: f.substring(0, f.indexOf(".")),
+      src: `/upload/${user?.userId}/${date}/${f}`,
+    }));
   return NextResponse.json(filesSrc);
 }

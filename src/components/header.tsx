@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 interface Props {
   user: User;
@@ -24,7 +25,9 @@ export function Header({ user }: Props) {
     <header className="fixed right-0 top-0 z-50 w-full">
       <div className="flex h-24 flex-row items-center justify-between bg-blue-400 pl-4 pr-8">
         <div className="relative h-16 w-36">
-          <Image src="/site-pic.png" alt="site picture" fill />
+          <Link href="/">
+            <Image src="/site-pic.png" alt="site picture" fill />
+          </Link>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

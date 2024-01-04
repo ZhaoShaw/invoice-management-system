@@ -5,6 +5,6 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = { transpilePackages: ["lucide-react"] };
+const config = { reactStrictMode: false, transpilePackages: ["lucide-react"] };
 
 export default config;
