@@ -40,6 +40,7 @@ type InvoiceItemDrag = {
 
 export default function Create() {
   const [uploading, setUploading] = useState(false);
+  const [selectGroup, setSelectGroup] = useState("ROOTITEMS");
   const [invoiceItemsMap, setInvoiceItemsMap] = useState<
     Map<string, InvoiceItemDrag[]>
   >(new Map([["ROOTITEMS", []]]));
@@ -161,106 +162,108 @@ export default function Create() {
               </section>
               {fields.map((field, index) => {
                 return (
-                  <section
-                    className="mt-4 grid grid-cols-3 items-start gap-2 px-2"
-                    key={field.id}
+                  <Droppable
+                    key={`GROUP${index}`}
+                    droppableId={`GROUP${index}`}
                   >
-                    <FormField
-                      control={form.control}
-                      name={`commit.${index}.totalAmount`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="0.00" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`commit.${index}.purpose`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select purpose" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.values(InvoiceGroupPurpose).map((i) => (
-                                <SelectItem key={i} value={i}>
-                                  {i}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        remove(index);
-                        removeGroupInvoiceItems(index);
-                      }}
-                    >
-                      <Icon name="x-circle" />
-                    </Button>
-                    <Droppable droppableId={`GROUP${index}`}>
-                      {(provided, snapshot) => (
-                        <div
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className="h-96 w-96 bg-blue-200"
-                        >
-                          {invoiceItemsMap
-                            .get(`GROUP${index}`)
-                            .map((i, index) => (
-                              <Draggable
-                                key={i.id}
-                                draggableId={i.id}
-                                index={index}
+                    {(provided, snapshot) => (
+                      <section
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className={
+                          (snapshot.isDraggingOver ? "bg-blue-200" : "") +
+                          " mt-4 grid grid-cols-3 items-start gap-2 px-2"
+                        }
+                        key={field.id}
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`commit.${index}.totalAmount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`commit.${index}.purpose`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
                               >
-                                {(provided, snapshot) => {
-                                  return (
-                                    <Image
-                                      src={i.src}
-                                      alt="1"
-                                      width={300}
-                                      height={300}
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                    />
-                                  );
-                                }}
-                              </Draggable>
-                            ))}
-                          {provided.placeholder}
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select purpose" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Object.values(InvoiceGroupPurpose).map(
+                                    (i) => (
+                                      <SelectItem key={i} value={i}>
+                                        {i}
+                                      </SelectItem>
+                                    ),
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              remove(index);
+                              removeGroupInvoiceItems(index);
+                            }}
+                          >
+                            <Icon name="x-circle" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setSelectGroup(`GROUP${index}`);
+                            }}
+                          >
+                            <Icon name="folder-closed" />
+                            {invoiceItemsMap.get(`GROUP${index}`)?.length}
+                          </Button>
                         </div>
-                      )}
-                    </Droppable>
-                  </section>
+                        {provided.placeholder}
+                      </section>
+                    )}
+                  </Droppable>
                 );
               })}
-              <Button
-                onClick={() => {
-                  append({
-                    totalAmount: "",
-                    purpose: InvoiceGroupPurpose.OTHER,
-                    invoiceItems: [],
-                  });
-                  updateMap(`GROUP${fields.length}`, []);
-                }}
-              >
-                Append
-              </Button>
+              <div className="space-x-2">
+                <Button
+                  onClick={() => {
+                    append({
+                      totalAmount: "",
+                      purpose: InvoiceGroupPurpose.OTHER,
+                      invoiceItems: [],
+                    });
+                    updateMap(`GROUP${fields.length}`, []);
+                  }}
+                >
+                  Append
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectGroup("ROOTITEMS");
+                  }}
+                >
+                  Show Rest Invoices
+                </Button>
+              </div>
             </div>
             <div className="bg-green-100">
               <Input
@@ -270,15 +273,10 @@ export default function Create() {
                 onChange={handleFilesSelect}
                 accept=".pdf,.png,.jpeg,.jpg "
               />
-              {/* <div>{[...invoiceItemsMap.keys()]}</div>
-              {[...invoiceItemsMap.keys()].map((k) => (
-                <div>{invoiceItemsMap.get(k)}</div>
-              ))} */}
-
-              <Droppable droppableId="ROOTITEMS">
+              <Droppable droppableId={selectGroup}>
                 {(provided, snapshot) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {invoiceItemsMap.get("ROOTITEMS").map((i, index) => {
+                    {invoiceItemsMap.get(selectGroup).map((i, index) => {
                       return (
                         <Draggable key={i.id} draggableId={i.id} index={index}>
                           {(provided, snapshot) => {
