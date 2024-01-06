@@ -32,6 +32,7 @@ import {
   Draggable,
   type DropResult,
 } from "react-beautiful-dnd";
+import { useRouter } from "next/navigation";
 
 type InvoiceItemDrag = {
   id: string;
@@ -39,6 +40,7 @@ type InvoiceItemDrag = {
 };
 
 export default function Create() {
+  const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [selectGroup, setSelectGroup] = useState("ROOTITEMS");
   const [invoiceItemsMap, setInvoiceItemsMap] = useState<
@@ -67,22 +69,15 @@ export default function Create() {
   const invoiceCreate = api.invoice.create.useMutation({
     onSuccess: () => {
       toast({ description: "success" });
+      router.push("/dashboard");
     },
     onError: () => {
       toast({ description: "error" });
     },
   });
+
   const form = useForm<InvoiceCommit>({
     resolver: zodResolver(invoiceCommitSchema),
-    // defaultValues: {
-    //   commit: [
-    //     {
-    //       totalAmount: "",
-    //       purpose: InvoiceGroupPurpose.OTHER,
-    //       invoiceItems: [{ invoiceItemSrc: "https://" }],
-    //     },
-    //   ],
-    // },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -94,6 +89,18 @@ export default function Create() {
   });
   function onSubmit(values: InvoiceCommit) {
     // console.log(values);
+
+    values.commit.forEach((group, index) => {
+      const invoiceSrcs = invoiceItemsMap.get(`GROUP${index}`)?.map((i) => {
+        return { invoiceItemSrc: i.src };
+      });
+      if (invoiceSrcs !== undefined && invoiceSrcs.length !== 0) {
+        group.invoiceItems = invoiceSrcs;
+      } else {
+        toast({ description: "Every item needs at least one invoice" });
+        throw new Error("Invoice can't be null");
+      }
+    });
     invoiceCreate.mutate(values);
   }
 
@@ -217,6 +224,7 @@ export default function Create() {
                         />
                         <div className="space-x-2">
                           <Button
+                            type="button"
                             variant="outline"
                             size="icon"
                             onClick={() => {
@@ -227,6 +235,7 @@ export default function Create() {
                             <Icon name="x-circle" />
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             size="icon"
                             onClick={() => {
@@ -245,6 +254,7 @@ export default function Create() {
               })}
               <div className="space-x-2">
                 <Button
+                  type="button"
                   onClick={() => {
                     append({
                       totalAmount: "",
@@ -257,6 +267,7 @@ export default function Create() {
                   Append
                 </Button>
                 <Button
+                  type="button"
                   onClick={() => {
                     setSelectGroup("ROOTITEMS");
                   }}

@@ -134,16 +134,17 @@ enum InvoiceGroupPurpose {
 
 // Invoice Item
 model InvoiceItem {
-    id             String       @id @default(cuid())
-    invoiceItemSrc String       @default("")
-    invoiceGroup   InvoiceGroup @relation(fields: [invoiceGroupId], references: [id], onDelete: Cascade)
-    invoiceGroupId String
-    createdBy      User         @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
-    createdUesrId  String
-    createdAt      DateTime     @default(now())
-    updatedBy      User         @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
-    updatedUesrId  String
-    updatedAt      DateTime     @updatedAt
+    id              String       @id @default(cuid())
+    invoiceItemSrc  String       @default("")
+    invoiceGroup    InvoiceGroup @relation(fields: [invoiceGroupId], references: [id], onDelete: Cascade)
+    invoiceGroupId  String
+    invoiceCommitId String       @default("")
+    createdBy       User         @relation(name: "CreatedUser", fields: [createdUesrId], references: [id])
+    createdUesrId   String
+    createdAt       DateTime     @default(now())
+    updatedBy       User         @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
+    updatedUesrId   String
+    updatedAt       DateTime     @updatedAt
 }
 
 // Invoice Period 

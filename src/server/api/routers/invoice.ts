@@ -2,41 +2,61 @@ import { z } from "zod";
 import { UserRole, CommitStatus } from "~/types/index.d";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { invoiceCommitSchema } from "~/lib/verification";
+import { formatISO } from "date-fns";
 
 export const invoiceRouter = createTRPCRouter({
   create: protectedProcedure
     .input(invoiceCommitSchema)
     .mutation(async ({ ctx, input }) => {
+      const nowPeriod = await ctx.db.invoicePeriod.findFirst({
+        where: {
+          AND: [
+            {
+              startAt: {
+                lte: formatISO(Date.now()),
+              },
+            },
+            {
+              endAt: {
+                gte: formatISO(Date.now()),
+              },
+            },
+          ],
+        },
+      });
       const invoiceCommit = await ctx.db.invoiceCommit.create({
         data: {
-          totalAmount: 10,
-          totalGroups: 10,
-          totalItems: 10,
+          totalAmount: input.commit.reduce(
+            (sum, i) => sum + parseFloat(i.totalAmount),
+            0,
+          ),
+          totalGroups: input.commit.length,
+          totalItems: input.commit.reduce(
+            (sum, i) => sum + i.invoiceItems.length,
+            0,
+          ),
           invoiceGroups: {
-            create: [
-              {
-                totalAmount: input.commit[0]?.totalAmount,
-                totalItems: 10,
-                purpose: input.commit[0]?.purpose,
+            create: input.commit.map((invoiceGroup) => {
+              return {
+                totalAmount: invoiceGroup.totalAmount,
+                totalItems: invoiceGroup.invoiceItems.length,
+                purpose: invoiceGroup.purpose,
                 invoiceItems: {
-                  createMany: {
-                    data: [
-                      {
-                        invoiceItemSrc:
-                          input.commit[0]?.invoiceItems[0]?.invoiceItemSrc,
-                        createdUesrId: ctx.session.user.id,
-                        updatedUesrId: ctx.session.user.id,
-                      },
-                    ],
-                  },
+                  create: invoiceGroup.invoiceItems.map((invoiceItem) => {
+                    return {
+                      invoiceItemSrc: invoiceItem.invoiceItemSrc,
+                      createdUesrId: ctx.session.user.id,
+                      updatedUesrId: ctx.session.user.id,
+                    };
+                  }),
                 },
                 createdUesrId: ctx.session.user.id,
                 updatedUesrId: ctx.session.user.id,
-              },
-            ],
+              };
+            }),
           },
           commitStatus: CommitStatus.NOTREVIEWED,
-          commitPeriod: { connect: { id: "clqsc8ygw0000rolq5qd32qwh" } },
+          commitPeriod: { connect: { id: nowPeriod?.id } },
           createdBy: { connect: { id: ctx.session.user.id } },
           updatedBy: { connect: { id: ctx.session.user.id } },
         },
@@ -48,5 +68,44 @@ export const invoiceRouter = createTRPCRouter({
           },
         },
       });
+      const commitRelation = await ctx.db.invoiceItem.updateMany({
+        where: {
+          invoiceGroupId: {
+            in: invoiceCommit.invoiceGroups.map((i) => i.id),
+          },
+        },
+        data: {
+          invoiceCommitId: invoiceCommit.id,
+        },
+      });
+    }),
+
+  getInvoiceCommitListByUser: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.invoiceCommit.findMany({
+      where: {
+        createdBy: { id: ctx.session.user.id },
+      },
+    });
+  }),
+
+  deleteInvoiceCommitById: protectedProcedure
+    .input(z.string().min(1))
+    .mutation(async ({ ctx, input }) => {
+      const invoiceCommit = ctx.db.invoiceCommit.delete({
+        where: {
+          id: input,
+        },
+      });
+      const invoiceGroup = ctx.db.invoiceGroup.deleteMany({
+        where: {
+          invoiceCommitId: input,
+        },
+      });
+      const invoiceItem = ctx.db.invoiceItem.deleteMany({
+        where: {
+          invoiceCommitId: input,
+        },
+      });
+      await ctx.db.$transaction([invoiceCommit, invoiceGroup, invoiceItem]);
     }),
 });
