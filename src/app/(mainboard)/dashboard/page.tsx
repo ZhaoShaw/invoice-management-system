@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -16,30 +15,39 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
 
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "~/components/ui/pagination";
+  type ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 import { api } from "~/trpc/react";
-import type { InvoiceCommit } from "@prisma/client/index.d";
 import Icon from "~/components/icon";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "~/components/ui/use-toast";
+import { columns } from "./_components/columns";
+
+import { subDays, format } from "date-fns";
+import { type DateRange } from "react-day-picker";
+import { Calendar } from "~/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { TablePagination } from "./_components/table-pagination";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -47,6 +55,25 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [groupSelected, setGroupSelected] = useState<string>("");
   const invoiceList = api.invoice.getInvoiceCommitListByUser.useQuery();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(Date.now(), 30),
+    to: new Date(Date.now()),
+  });
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const table = useReactTable({
+    data: invoiceList.data ?? [],
+    columns,
+    state: {
+      columnFilters,
+    },
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  });
 
   const deleteMutation = api.invoice.deleteInvoiceCommitById.useMutation({
     onSuccess: async () => {
@@ -69,58 +96,108 @@ export default function Dashboard() {
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <Button asChild>
-          <Link href="/invoices/create">Create Commit</Link>
-        </Button>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
-              <TableHead>Total Amount</TableHead>
-              <TableHead>Total Groups</TableHead>
-              <TableHead>Number of Invoices </TableHead>
-              <TableHead>Commit Status</TableHead>
-              <TableHead className="text-right">Created Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoiceList.data.map((commit: InvoiceCommit) => (
-              <TableRow key={commit.id}>
-                <TableCell className="font-medium">{commit.id}</TableCell>
-                <TableCell>{commit.totalAmount.toString()}</TableCell>
-                <TableCell>{commit.totalGroups}</TableCell>
-                <TableCell>{commit.totalItems}</TableCell>
-                <TableCell>{commit.commitStatus}</TableCell>
-                <TableCell className="text-right">
-                  {commit.createdAt.toLocaleDateString()}
-                </TableCell>
-                <div className="space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => {
-                      router.push(`/invoices/edit/${commit.id}`);
-                    }}
-                  >
-                    <Icon name="file-edit" />
-                  </Button>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setGroupSelected(commit.id);
-                      }}
-                    >
-                      <Icon name="x-circle" />
-                    </Button>
-                  </DialogTrigger>
-                </div>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button id="date" variant={"outline"}>
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "LLL dd,y")} -{" "}
+                      {format(date.to, "LLL dd,y")}
+                    </>
+                  ) : (
+                    format(date.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={(e: DateRange | undefined) => {
+                  setDate(e);
+                  table.getColumn("createdAt")?.setFilterValue(e);
+                }}
+                numberOfMonths={2}
+              ></Calendar>
+            </PopoverContent>
+          </Popover>
 
+          <Button asChild>
+            <Link href="/invoices/create">Create Commit</Link>
+          </Button>
+        </div>
+        <div>
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                    <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          router.push(`/invoices/edit/${row.original.id}`);
+                        }}
+                      >
+                        <Icon name="file-edit" />
+                      </Button>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setGroupSelected(row.original.id);
+                          }}
+                        >
+                          <Icon name="x-circle" />
+                        </Button>
+                      </DialogTrigger>
+                    </div>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>No Results</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <TablePagination table={table}></TablePagination>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center">
             <DialogTitle>Delete ?</DialogTitle>
