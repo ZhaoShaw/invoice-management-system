@@ -49,6 +49,16 @@ import {
 } from "~/components/ui/popover";
 import { TablePagination } from "./_components/table-pagination";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+
+import b64ToBlob from "b64-to-blob";
+import { saveAs } from "file-saver";
+
 export default function Dashboard() {
   const router = useRouter();
   const { toast } = useToast();
@@ -90,6 +100,29 @@ export default function Dashboard() {
   const handleDelete = () => {
     deleteMutation.mutate(groupSelected);
   };
+
+  const exportCommit = (commitId: string) => {
+    console.log(commitId);
+  };
+
+  const exportInvoices = async (commitId: string) => {
+    const res = await fetch(
+      `/api/download/${commitId}?` +
+        new URLSearchParams({
+          type: "invoices",
+        }).toString(),
+      {
+        method: "get",
+      },
+    );
+    const zipAsBase64 = await res.text();
+    const blob = b64ToBlob(zipAsBase64, "application/zip");
+    saveAs(blob, `example.zip`);
+  };
+  const exportSheet = (commitId: string) => {
+    console.log(commitId);
+  };
+
   if (invoiceList.data === undefined) {
     return;
   }
@@ -186,6 +219,39 @@ export default function Dashboard() {
                           <Icon name="x-circle" />
                         </Button>
                       </DialogTrigger>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="icon">
+                            <Icon name="folder-input" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem asChild>
+                            <Button
+                              variant="link"
+                              onClick={() => exportCommit(row.original.id)}
+                            >
+                              Export Commit
+                            </Button>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Button
+                              variant="link"
+                              onClick={() => exportInvoices(row.original.id)}
+                            >
+                              Export Invoices
+                            </Button>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Button
+                              variant="link"
+                              onClick={() => exportSheet(row.original.id)}
+                            >
+                              Export Sheet
+                            </Button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableRow>
                 ))

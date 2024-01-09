@@ -88,6 +88,17 @@ export const invoiceRouter = createTRPCRouter({
     });
   }),
 
+  getInvoiceSrcListByCommitId: protectedProcedure
+    .input(z.string().min(1))
+    .query(async ({ ctx, input }) => {
+      const invoiceItems = await ctx.db.invoiceItem.findMany({
+        where: {
+          invoiceCommitId: input,
+        },
+      });
+      return invoiceItems.map((i) => i.invoiceItemSrc);
+    }),
+
   deleteInvoiceCommitById: protectedProcedure
     .input(z.string().min(1))
     .mutation(async ({ ctx, input }) => {
