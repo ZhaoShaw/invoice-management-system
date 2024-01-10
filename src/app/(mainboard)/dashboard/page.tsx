@@ -117,7 +117,7 @@ export default function Dashboard() {
     );
     const zipAsBase64 = await res.text();
     const blob = b64ToBlob(zipAsBase64, "application/zip");
-    saveAs(blob, `example.zip`);
+    saveAs(blob, `invoices.zip`);
   };
   const exportSheet = (commitId: string) => {
     console.log(commitId);

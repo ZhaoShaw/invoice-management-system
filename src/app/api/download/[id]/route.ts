@@ -9,20 +9,8 @@ async function getInvoices(commitId: string) {
     await api.invoice.getInvoiceSrcListByCommitId.query(commitId);
   const zip = new JSZip();
   invoiceSrcList.forEach((i) =>
-    zip.file(
-      i,
-      fs.readFileSync(
-        path.resolve(__dirname, "../../../../../../public" + i),
-        "base64",
-      ),
-    ),
+    zip.file(i.substring(i.lastIndexOf("/")), fs.readFileSync("public" + i)),
   );
-  // zip
-  //   .generateNodeStream({ type: "nodebuffer", streamFiles: true })
-  //   .pipe(fs.createWriteStream("invoices.zip"))
-  //   .on("finish", function () {
-  //     console.log("sample.zip written.");
-  //   });
   return zip;
 }
 
