@@ -119,8 +119,19 @@ export default function Dashboard() {
     const blob = b64ToBlob(zipAsBase64, "application/zip");
     saveAs(blob, `invoices.zip`);
   };
-  const exportSheet = (commitId: string) => {
-    console.log(commitId);
+  const exportSheet = async (commitId: string) => {
+    const res = await fetch(
+      `/api/download/${commitId}?` +
+        new URLSearchParams({
+          type: "sheet",
+        }).toString(),
+      {
+        method: "get",
+      },
+    );
+    const zipAsBase64 = await res.text();
+    const blob = b64ToBlob(zipAsBase64, "application/zip");
+    saveAs(blob, `sheet.zip`);
   };
 
   if (invoiceList.data === undefined) {

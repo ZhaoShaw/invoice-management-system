@@ -99,6 +99,16 @@ export const invoiceRouter = createTRPCRouter({
       return invoiceItems.map((i) => i.invoiceItemSrc);
     }),
 
+  getInvoiceGroupsByCommitId: protectedProcedure
+    .input(z.string().min(1))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.invoiceGroup.findMany({
+        where: {
+          invoiceCommitId: input,
+        },
+      });
+    }),
+
   deleteInvoiceCommitById: protectedProcedure
     .input(z.string().min(1))
     .mutation(async ({ ctx, input }) => {
