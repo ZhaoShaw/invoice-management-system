@@ -101,37 +101,34 @@ export default function Dashboard() {
     deleteMutation.mutate(groupSelected);
   };
 
-  const exportCommit = (commitId: string) => {
-    console.log(commitId);
+  const fetchZipFiles = async (
+    commitId: string,
+    typeName: string,
+    fileName: string,
+  ) => {
+    const res = await fetch(
+      `/api/download/${commitId}?` +
+        new URLSearchParams({
+          type: typeName,
+        }).toString(),
+      {
+        method: "get",
+      },
+    );
+    const zipAsBase64 = await res.text();
+    const blob = b64ToBlob(zipAsBase64, "application/zip");
+    saveAs(blob, fileName);
+  };
+
+  const exportCommit = async (commitId: string) => {
+    await fetchZipFiles(commitId, "commit", "commit.zip");
   };
 
   const exportInvoices = async (commitId: string) => {
-    const res = await fetch(
-      `/api/download/${commitId}?` +
-        new URLSearchParams({
-          type: "invoices",
-        }).toString(),
-      {
-        method: "get",
-      },
-    );
-    const zipAsBase64 = await res.text();
-    const blob = b64ToBlob(zipAsBase64, "application/zip");
-    saveAs(blob, `invoices.zip`);
+    await fetchZipFiles(commitId, "invoices", "invoices.zip");
   };
   const exportSheet = async (commitId: string) => {
-    const res = await fetch(
-      `/api/download/${commitId}?` +
-        new URLSearchParams({
-          type: "sheet",
-        }).toString(),
-      {
-        method: "get",
-      },
-    );
-    const zipAsBase64 = await res.text();
-    const blob = b64ToBlob(zipAsBase64, "application/zip");
-    saveAs(blob, `sheet.zip`);
+    await fetchZipFiles(commitId, "sheet", "sheet.zip");
   };
 
   if (invoiceList.data === undefined) {
