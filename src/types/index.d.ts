@@ -1,4 +1,7 @@
-import { type invoiceCommitSchema } from "~/lib/verification";
+import {
+  type invoiceCommitSchema,
+  type invoiceGroupSchema,
+} from "~/lib/verification";
 import type * as z from "zod";
 
 export enum UserRole {
@@ -24,3 +27,5 @@ export enum InvoiceGroupPurpose {
 }
 
 export type InvoiceCommit = z.infer<typeof invoiceCommitSchema>;
+
+export type InvoiceGroup = z.infer<typeof invoiceGroupSchema>;

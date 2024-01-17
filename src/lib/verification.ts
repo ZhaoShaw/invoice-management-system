@@ -2,9 +2,11 @@ import * as z from "zod";
 import { InvoiceGroupPurpose } from "~/types/index.d";
 
 export const invoiceItemSchema = z.object({
+  id: z.string().min(1).nullable(),
   invoiceItemSrc: z.string(),
 });
 export const invoiceGroupSchema = z.object({
+  id: z.string().min(1).nullable(),
   totalAmount: z
     .string()
     .regex(
@@ -22,5 +24,6 @@ export const invoiceGroupSchema = z.object({
 });
 
 export const invoiceCommitSchema = z.object({
+  id: z.string().min(1).optional(),
   commit: z.array(invoiceGroupSchema),
 });

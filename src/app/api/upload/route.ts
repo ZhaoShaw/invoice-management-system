@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 import { format } from "date-fns";
 import { fromPath } from "pdf2pic";
 import { v4 as uuidv4 } from "uuid";
+import { getTodayUploadFiles } from "~/lib/func";
 
 const options = {
   density: 100,
@@ -59,20 +60,16 @@ export async function GET(req: NextRequest) {
   const user = await api.user.getUserBySessionToken.query({
     sessionToken: req.cookies.get("next-auth.session-token")!.value,
   });
-  const date = format(new Date(Date.now()), "yyyy-MM-dd");
-  const userInvoiceDir = `public/upload/${user?.userId}/${date}`;
-  const files = fs.readdirSync(userInvoiceDir);
-  // console.log(files[0]);
-  const filesSrc = files
-    .filter(
-      (f) =>
-        f.toLowerCase().endsWith(".png") ||
-        f.toLowerCase().endsWith(".jpg") ||
-        f.toLowerCase().endsWith(".jpeg"),
-    )
-    .map((f) => ({
-      id: f.substring(0, f.indexOf(".")),
-      src: `/upload/${user?.userId}/${date}/${f}`,
+  const userId = user?.id;
+  if (userId === undefined) {
+    return NextResponse.error();
+  } else {
+    const unassigned = getTodayUploadFiles(userId);
+    const filesSrc = unassigned.map((f) => ({
+      id: null,
+      dragId: f.substring(f.lastIndexOf("/") + 1, f.indexOf(".")),
+      src: f,
     }));
-  return NextResponse.json(filesSrc);
+    return NextResponse.json(filesSrc);
+  }
 }
