@@ -1,6 +1,7 @@
 import { getServerAuthSession } from "~/server/auth";
 import { redirect } from "next/navigation";
 import { UserRole } from "~/types/index.d";
+import BodyLayout from "~/components/body-layout";
 
 export default async function Layout({
   children,
@@ -11,5 +12,11 @@ export default async function Layout({
   if (!session || session.user.role !== UserRole.ADMIN) {
     redirect("/");
   }
-  return <div>{children}</div>;
+  return (
+    <BodyLayout
+      isInAdmin={true}
+      user={session.user}
+      children={children}
+    ></BodyLayout>
+  );
 }

@@ -1,6 +1,6 @@
 import { getServerAuthSession } from "~/server/auth";
 import { redirect } from "next/navigation";
-import { BodyLayout } from "~/components/body-layout";
+import BodyLayout from "~/components/body-layout";
 
 export default async function Layout({
   children,

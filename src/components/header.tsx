@@ -12,12 +12,14 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { UserRole } from "~/types/index.d";
 
 interface Props {
+  isInAdmin?: boolean;
   user: User;
 }
 
-export function Header({ user }: Props) {
+export function Header({ isInAdmin = false, user }: Props) {
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -40,6 +42,16 @@ export function Header({ user }: Props) {
             <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              {user.role === UserRole.ADMIN && (
+                <DropdownMenuItem asChild>
+                  {isInAdmin ? (
+                    <Link href="/dashboard">Switch to Normal User</Link>
+                  ) : (
+                    <Link href="/admin/dashboard">Switch to Admin</Link>
+                  )}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleSignOut}>
                 Sign Out
               </DropdownMenuItem>
