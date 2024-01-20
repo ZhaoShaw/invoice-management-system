@@ -43,15 +43,18 @@ export function Header({ isInAdmin = false, user }: Props) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               {user.role === UserRole.ADMIN && (
-                <DropdownMenuItem asChild>
-                  {isInAdmin ? (
-                    <Link href="/dashboard">Switch to Normal User</Link>
-                  ) : (
-                    <Link href="/admin/dashboard">Switch to Admin</Link>
-                  )}
-                </DropdownMenuItem>
+                <div>
+                  <DropdownMenuItem asChild>
+                    {isInAdmin ? (
+                      <Link href="/dashboard">Switch to Normal User</Link>
+                    ) : (
+                      <Link href="/admin/dashboard">Switch to Admin</Link>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </div>
               )}
-              <DropdownMenuSeparator />
+
               <DropdownMenuItem onSelect={handleSignOut}>
                 Sign Out
               </DropdownMenuItem>

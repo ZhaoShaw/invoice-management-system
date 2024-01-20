@@ -2,6 +2,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { type CommitStatus } from "~/types/index.d";
 import type { InvoiceCommit } from "@prisma/client/index.d";
 import { type DateRange } from "react-day-picker";
+import { TableRowActions } from "./table-row-actions";
 
 export const columns: ColumnDef<InvoiceCommit>[] = [
   {
@@ -46,8 +47,13 @@ export const columns: ColumnDef<InvoiceCommit>[] = [
       const sd: Date = value.from;
       const ed: Date = value.to;
       const date: Date = row.getValue("createdAt");
-      console.log(sd, ed, date);
       return date >= sd && date <= ed;
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ table, row }) => {
+      return <TableRowActions table={table} row={row} />;
     },
   },
 ];

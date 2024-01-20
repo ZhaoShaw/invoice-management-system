@@ -257,6 +257,9 @@ export const invoiceRouter = createTRPCRouter({
       where: {
         createdBy: { id: ctx.session.user.id },
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
   }),
 
