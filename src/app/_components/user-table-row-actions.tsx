@@ -10,24 +10,19 @@ import {
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import Icon from "~/components/icon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+
 import { useRouter } from "next/navigation";
-import b64ToBlob from "b64-to-blob";
-import { saveAs } from "file-saver";
+
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
 import { useState } from "react";
+import { ExportActions } from "./export-actions";
 
 interface TableRowActionsProps<TData> {
   table: Table<TData>;
   row: Row<TData>;
 }
-export function TableRowActions<TData>({
+export function UserTableRowActions<TData>({
   table,
   row,
 }: TableRowActionsProps<TData>) {
@@ -52,34 +47,7 @@ export function TableRowActions<TData>({
   const handleDelete = () => {
     deleteMutation.mutate(groupSelected);
   };
-  const fetchZipFiles = async (
-    commitId: string,
-    typeName: string,
-    fileName: string,
-  ) => {
-    const res = await fetch(
-      `/api/download/${commitId}?` +
-        new URLSearchParams({
-          type: typeName,
-        }).toString(),
-      {
-        method: "get",
-      },
-    );
-    const zipAsBase64 = await res.text();
-    const blob = b64ToBlob(zipAsBase64, "application/zip");
-    saveAs(blob, fileName);
-  };
-  const exportCommit = async (commitId: string) => {
-    await fetchZipFiles(commitId, "commit", "commit.zip");
-  };
 
-  const exportInvoices = async (commitId: string) => {
-    await fetchZipFiles(commitId, "invoices", "invoices.zip");
-  };
-  const exportSheet = async (commitId: string) => {
-    await fetchZipFiles(commitId, "sheet", "sheet.zip");
-  };
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -104,30 +72,7 @@ export function TableRowActions<TData>({
               <Icon name="x-circle" />
             </Button>
           </DialogTrigger>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Icon name="folder-input" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <Button variant="link" onClick={() => exportCommit(commitId)}>
-                  Export Commit
-                </Button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Button variant="link" onClick={() => exportInvoices(commitId)}>
-                  Export Invoices
-                </Button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Button variant="link" onClick={() => exportSheet(commitId)}>
-                  Export Sheet
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ExportActions commitId={commitId} />
         </div>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center">

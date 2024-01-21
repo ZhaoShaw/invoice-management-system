@@ -38,6 +38,7 @@ import {
 } from "react-beautiful-dnd";
 import { useRouter } from "next/navigation";
 import _ from "lodash";
+import Link from "next/link";
 
 type InvoiceItemDrag = {
   id: string | null;
@@ -46,8 +47,10 @@ type InvoiceItemDrag = {
 };
 
 export default function CreateEdit({
+  isQueryMode = false,
   commitId,
 }: {
+  isQueryMode: boolean;
   commitId: string | undefined;
 }) {
   const isAddMode = !commitId;
@@ -150,6 +153,10 @@ export default function CreateEdit({
             }),
           );
         });
+
+        if (isQueryMode) {
+          setSelectGroup("GROUP0");
+        }
       }
     };
     fetchInvoiceCommitEntry().catch(console.error);
@@ -280,6 +287,7 @@ export default function CreateEdit({
                       >
                         <FormField
                           control={form.control}
+                          disabled={isQueryMode}
                           name={`commit.${index}.totalAmount`}
                           render={({ field }) => (
                             <FormItem>
@@ -298,6 +306,7 @@ export default function CreateEdit({
                               <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
+                                disabled={isQueryMode}
                               >
                                 <FormControl>
                                   <SelectTrigger>
@@ -318,17 +327,19 @@ export default function CreateEdit({
                           )}
                         />
                         <div className="space-x-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              remove(index);
-                              removeGroupInvoiceItems(index);
-                            }}
-                          >
-                            <Icon name="x-circle" />
-                          </Button>
+                          {!isQueryMode && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => {
+                                remove(index);
+                                removeGroupInvoiceItems(index);
+                              }}
+                            >
+                              <Icon name="x-circle" />
+                            </Button>
+                          )}
                           <Button
                             type="button"
                             variant="outline"
@@ -347,39 +358,44 @@ export default function CreateEdit({
                   </Droppable>
                 );
               })}
-              <div className="space-x-2">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    append({
-                      id: null,
-                      totalAmount: "",
-                      purpose: InvoiceGroupPurpose.OTHER,
-                      invoiceItems: [],
-                    });
-                    updateMap(`GROUP${fields.length}`, []);
-                  }}
-                >
-                  Append
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setSelectGroup("ROOTITEMS");
-                  }}
-                >
-                  Show Rest Invoices
-                </Button>
-              </div>
+
+              {!isQueryMode && (
+                <div className="space-x-2">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      append({
+                        id: null,
+                        totalAmount: "",
+                        purpose: InvoiceGroupPurpose.OTHER,
+                        invoiceItems: [],
+                      });
+                      updateMap(`GROUP${fields.length}`, []);
+                    }}
+                  >
+                    Append
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setSelectGroup("ROOTITEMS");
+                    }}
+                  >
+                    Show Rest Invoices
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="bg-green-100">
-              <Input
-                disabled={uploading}
-                type="file"
-                multiple
-                onChange={handleFilesSelect}
-                accept=".pdf,.png,.jpeg,.jpg "
-              />
+              {!isQueryMode && (
+                <Input
+                  disabled={uploading}
+                  type="file"
+                  multiple
+                  onChange={handleFilesSelect}
+                  accept=".pdf,.png,.jpeg,.jpg "
+                />
+              )}
               <Droppable droppableId={selectGroup}>
                 {(provided, snapshot) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
@@ -389,6 +405,7 @@ export default function CreateEdit({
                           key={i.dragId}
                           draggableId={i.dragId}
                           index={index}
+                          isDragDisabled={isQueryMode}
                         >
                           {(provided, snapshot) => {
                             return (
@@ -412,9 +429,21 @@ export default function CreateEdit({
               </Droppable>
             </div>
           </DragDropContext>
-          <Button className="fixed inset-x-0 bottom-0 bg-red-100" type="submit">
-            Submit
-          </Button>
+          {!isQueryMode ? (
+            <Button
+              className="fixed inset-x-0 bottom-0 bg-red-100"
+              type="submit"
+            >
+              Submit
+            </Button>
+          ) : (
+            <div className="fixed inset-x-0 bottom-0 flex justify-center space-x-10 bg-red-100">
+              <Button type="button">Approve</Button>
+              <Button type="button" variant="outline" asChild>
+                <Link href="/admin/dashboard">Unapprove</Link>
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
     </div>

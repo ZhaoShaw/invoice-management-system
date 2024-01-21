@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { UserRole, CommitStatus } from "~/types/index.d";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  adminProcedure,
+} from "~/server/api/trpc";
 import { invoiceCommitSchema } from "~/lib/verification";
 import { formatISO, format } from "date-fns";
 import fs from "fs";
@@ -259,6 +263,21 @@ export const invoiceRouter = createTRPCRouter({
       },
       orderBy: {
         updatedAt: "desc",
+      },
+    });
+  }),
+
+  getInvoiceCommitList: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.invoiceCommit.findMany({
+      orderBy: {
+        updatedAt: "desc",
+      },
+      include: {
+        updatedBy: {
+          select: {
+            email: true,
+          },
+        },
       },
     });
   }),

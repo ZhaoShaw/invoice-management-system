@@ -47,7 +47,7 @@ export function TableToolbar<TData>({ table }: TableToolbarProps<TData>) {
             selected={date}
             onSelect={(e: DateRange | undefined) => {
               setDate(e);
-              table.getColumn("createdAt")?.setFilterValue(e);
+              table.getColumn("updatedAt")?.setFilterValue(e);
             }}
             numberOfMonths={2}
           ></Calendar>
