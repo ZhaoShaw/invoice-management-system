@@ -1,7 +1,7 @@
 "use client";
 
 import { userColumns } from "~/app/_components/columns";
-import { TableList } from "~/app/_components/table-list";
+import { InvoiceTable } from "~/app/_components/invoice-table";
 import { api } from "~/trpc/react";
 
 export default function Dashboard() {
@@ -10,7 +10,7 @@ export default function Dashboard() {
     return;
   }
   return (
-    <TableList
+    <InvoiceTable
       data={invoiceList.data}
       columns={userColumns}
       refetch={invoiceList.refetch}

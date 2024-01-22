@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  adminProcedure,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
@@ -31,4 +32,8 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
+
+  getAllUsers: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findMany({});
+  }),
 });
