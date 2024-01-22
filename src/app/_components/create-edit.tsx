@@ -256,6 +256,27 @@ export default function CreateEdit({
     changeIndex(index);
   }
 
+  const approve = api.invoice.handleApprove.useMutation({
+    onSuccess(data, variables, context) {
+      toast({
+        description: `${variables.approve ? "Approved" : "Unapproved"}`,
+      });
+      router.push("/admin/dashboard");
+    },
+    onError() {
+      toast({
+        description: "error",
+      });
+    },
+  });
+  function handleApprove() {
+    approve.mutate({ approve: true, commitId: commitId! });
+  }
+
+  function handleUnapprove() {
+    approve.mutate({ approve: false, commitId: commitId! });
+  }
+
   return (
     <div>
       <Form {...form}>
@@ -438,9 +459,11 @@ export default function CreateEdit({
             </Button>
           ) : (
             <div className="fixed inset-x-0 bottom-0 flex justify-center space-x-10 bg-red-100">
-              <Button type="button">Approve</Button>
-              <Button type="button" variant="outline" asChild>
-                <Link href="/admin/dashboard">Unapprove</Link>
+              <Button type="button" onClick={handleApprove}>
+                Approve
+              </Button>
+              <Button type="button" variant="outline" onClick={handleUnapprove}>
+                Unapprove
               </Button>
             </div>
           )}

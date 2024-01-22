@@ -230,6 +230,7 @@ export const invoiceRouter = createTRPCRouter({
           ),
           commitPeriod: { connect: { id: nowPeriod?.id } },
           updatedBy: { connect: { id: ctx.session.user.id } },
+          updatedAt: formatISO(Date.now()),
         },
       });
     }),
@@ -268,7 +269,7 @@ export const invoiceRouter = createTRPCRouter({
   }),
 
   getInvoiceCommitList: adminProcedure.query(async ({ ctx }) => {
-    return await ctx.db.invoiceCommit.findMany({
+    const invoices = await ctx.db.invoiceCommit.findMany({
       orderBy: {
         updatedAt: "desc",
       },
@@ -279,6 +280,9 @@ export const invoiceRouter = createTRPCRouter({
           },
         },
       },
+    });
+    return invoices.map((i) => {
+      return { ...i, updatedBy: i.updatedBy.email! };
     });
   }),
 
@@ -341,5 +345,25 @@ export const invoiceRouter = createTRPCRouter({
         dragId: f.substring(f.lastIndexOf("/") + 1, f.indexOf(".")),
         src: f,
       }));
+    }),
+
+  handleApprove: adminProcedure
+    .input(
+      z.object({
+        approve: z.boolean(),
+        commitId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.invoiceCommit.update({
+        where: {
+          id: input.commitId,
+        },
+        data: {
+          commitStatus: input.approve
+            ? CommitStatus.REVIEWED
+            : CommitStatus.NOTREVIEWED,
+        },
+      });
     }),
 });

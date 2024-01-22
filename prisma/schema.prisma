@@ -99,7 +99,7 @@ model InvoiceCommit {
     createdAt       DateTime       @default(now())
     updatedBy       User           @relation(name: "UpdatedUser", fields: [updatedUesrId], references: [id])
     updatedUesrId   String
-    updatedAt       DateTime       @updatedAt
+    updatedAt       DateTime       @default(now())
 }
 
 enum CommitStatus {

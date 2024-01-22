@@ -5,9 +5,11 @@ import { type DateRange } from "react-day-picker";
 import { UserTableRowActions } from "./user-table-row-actions";
 import { AdminTableRowActions } from "./admin-table-row-actions";
 
-export const columns: ColumnDef<
-  InvoiceCommit & { updatedBy: { email: string } }
->[] = [
+interface InvoiceCommitTable extends InvoiceCommit {
+  updatedBy?: string;
+}
+
+export const columns: ColumnDef<InvoiceCommitTable>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -66,7 +68,7 @@ export const adminColumns = columns.concat([
   {
     accessorKey: "updatedBy",
     header: "User",
-    cell: ({ row }) => <div>{row.getValue("updatedBy")?.email}</div>,
+    cell: ({ row }) => <div>{row.getValue("updatedBy")}</div>,
   },
   {
     id: "actions",
