@@ -1,4 +1,5 @@
-import CreateEdit from "../../../_components/create-edit";
+import CreateEdit from "~/app/_components/create-edit";
+
 export default function Create() {
-  return <CreateEdit commitId={undefined}></CreateEdit>;
+  return <CreateEdit />;
 }

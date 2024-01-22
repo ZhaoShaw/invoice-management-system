@@ -257,6 +257,19 @@ export const invoiceRouter = createTRPCRouter({
       }
     }),
 
+  getCommitStatusByCommitId: protectedProcedure
+    .input(z.string().min(1))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.invoiceCommit.findFirst({
+        where: {
+          id: input,
+        },
+        select: {
+          commitStatus: true,
+        },
+      });
+    }),
+
   getInvoiceCommitListByUser: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.invoiceCommit.findMany({
       where: {

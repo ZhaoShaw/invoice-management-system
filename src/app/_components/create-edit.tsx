@@ -38,7 +38,6 @@ import {
 } from "react-beautiful-dnd";
 import { useRouter } from "next/navigation";
 import _ from "lodash";
-import Link from "next/link";
 
 type InvoiceItemDrag = {
   id: string | null;
@@ -47,11 +46,13 @@ type InvoiceItemDrag = {
 };
 
 export default function CreateEdit({
-  isQueryMode = false,
-  commitId,
+  isLockMode = false,
+  isInAdmin = false,
+  commitId = undefined,
 }: {
-  isQueryMode: boolean;
-  commitId: string | undefined;
+  isLockMode?: boolean;
+  isInAdmin?: boolean;
+  commitId?: string | undefined;
 }) {
   const isAddMode = !commitId;
   const router = useRouter();
@@ -154,7 +155,7 @@ export default function CreateEdit({
           );
         });
 
-        if (isQueryMode) {
+        if (isLockMode) {
           setSelectGroup("GROUP0");
         }
       }
@@ -308,7 +309,7 @@ export default function CreateEdit({
                       >
                         <FormField
                           control={form.control}
-                          disabled={isQueryMode}
+                          disabled={isLockMode}
                           name={`commit.${index}.totalAmount`}
                           render={({ field }) => (
                             <FormItem>
@@ -327,7 +328,7 @@ export default function CreateEdit({
                               <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
-                                disabled={isQueryMode}
+                                disabled={isLockMode}
                               >
                                 <FormControl>
                                   <SelectTrigger>
@@ -348,7 +349,7 @@ export default function CreateEdit({
                           )}
                         />
                         <div className="space-x-2">
-                          {!isQueryMode && (
+                          {!isLockMode && (
                             <Button
                               type="button"
                               variant="outline"
@@ -380,7 +381,7 @@ export default function CreateEdit({
                 );
               })}
 
-              {!isQueryMode && (
+              {!isLockMode && (
                 <div className="space-x-2">
                   <Button
                     type="button"
@@ -408,7 +409,7 @@ export default function CreateEdit({
               )}
             </div>
             <div className="bg-green-100">
-              {!isQueryMode && (
+              {!isLockMode && (
                 <Input
                   disabled={uploading}
                   type="file"
@@ -426,7 +427,7 @@ export default function CreateEdit({
                           key={i.dragId}
                           draggableId={i.dragId}
                           index={index}
-                          isDragDisabled={isQueryMode}
+                          isDragDisabled={isLockMode}
                         >
                           {(provided, snapshot) => {
                             return (
@@ -450,14 +451,16 @@ export default function CreateEdit({
               </Droppable>
             </div>
           </DragDropContext>
-          {!isQueryMode ? (
+          {!isLockMode && !isInAdmin && (
             <Button
               className="fixed inset-x-0 bottom-0 bg-red-100"
               type="submit"
             >
               Submit
             </Button>
-          ) : (
+          )}
+
+          {isInAdmin && (
             <div className="fixed inset-x-0 bottom-0 flex justify-center space-x-10 bg-red-100">
               <Button type="button" onClick={handleApprove}>
                 Approve
