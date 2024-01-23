@@ -12,6 +12,11 @@ export default async function Layout({
   if (!session || session.user.role !== UserRole.ADMIN) {
     redirect("/");
   }
+
+  if (session.user.name === undefined || !session.user.name) {
+    redirect("/common/username");
+  }
+
   return (
     <BodyLayout
       isInAdmin={true}

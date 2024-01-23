@@ -19,6 +19,19 @@ export const userRouter = createTRPCRouter({
         data: { role: input.role },
       });
     }),
+
+  setUserName: protectedProcedure
+    .input(z.string().min(1))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          name: input,
+        },
+      });
+    }),
   getUserBySessionToken: protectedProcedure
     .input(
       z.object({

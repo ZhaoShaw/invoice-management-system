@@ -11,6 +11,11 @@ export default async function Layout({
   if (!session) {
     redirect("/login");
   }
+
+  if (session.user.name === undefined || !session.user.name) {
+    redirect("/common/username");
+  }
+
   return (
     <div>
       <BodyLayout user={session.user} children={children}></BodyLayout>
