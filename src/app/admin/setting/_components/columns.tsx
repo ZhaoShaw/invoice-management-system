@@ -9,6 +9,11 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div>{row.getValue("id")}</div>,
   },
   {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+  },
+  {
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => <div>{row.getValue("email")}</div>,

@@ -7,6 +7,7 @@ import {
 } from "~/server/api/trpc";
 import { UserRole } from "~/types/index.d";
 import { env } from "~/env";
+import { newUserSchema } from "~/lib/verification";
 
 export const userRouter = createTRPCRouter({
   setRole: publicProcedure
@@ -31,6 +32,54 @@ export const userRouter = createTRPCRouter({
           name: input,
         },
       });
+    }),
+
+  createUser: adminProcedure
+    .input(newUserSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.user.create({
+        data: {
+          name: input.name,
+          email: input.email,
+        },
+      });
+    }),
+
+  updateUser: adminProcedure
+    .input(newUserSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!input.id) {
+        return;
+      }
+
+      const previous = await ctx.db.user.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+
+      if (!previous) {
+        return;
+      }
+      await ctx.db.user.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          email: input.email,
+        },
+      });
+      await ctx.db.session.deleteMany({
+        where: { userId: input.id },
+      });
+      if (!previous.email) {
+        await ctx.db.verificationToken.deleteMany({
+          where: {
+            identifier: previous.email!,
+          },
+        });
+      }
     }),
   getUserBySessionToken: protectedProcedure
     .input(

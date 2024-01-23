@@ -1,3 +1,9 @@
+import { UserCreateEdit } from "./user-create-edit";
+
 export function UserSettingTableToolbar() {
-  return <div>UserSettingTableToolbar</div>;
+  return (
+    <div>
+      <UserCreateEdit />
+    </div>
+  );
 }

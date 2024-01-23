@@ -289,13 +289,13 @@ export const invoiceRouter = createTRPCRouter({
       include: {
         updatedBy: {
           select: {
-            email: true,
+            name: true,
           },
         },
       },
     });
     return invoices.map((i) => {
-      return { ...i, updatedBy: i.updatedBy.email! };
+      return { ...i, updatedBy: i.updatedBy.name! };
     });
   }),
 

@@ -27,3 +27,11 @@ export const invoiceCommitSchema = z.object({
   id: z.string().min(1).optional(),
   commit: z.array(invoiceGroupSchema),
 });
+
+export const newUserSchema = z.object({
+  id: z.string().min(1).optional(),
+  name: z.string().min(1),
+  email: z.string().email({
+    message: "Must be a valid email",
+  }),
+});

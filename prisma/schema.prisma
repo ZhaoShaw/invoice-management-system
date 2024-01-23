@@ -60,6 +60,7 @@ model User {
     emailVerified         DateTime?
     image                 String?
     role                  UserRole        @default(USER)
+    status                UserStatus      @default(ALLOW)
     accounts              Account[]
     sessions              Session[]
     posts                 Post[]
@@ -74,6 +75,11 @@ model User {
 enum UserRole {
     USER
     ADMIN
+}
+
+enum UserStatus {
+    ALLOW
+    FORBIDDEN
 }
 
 model VerificationToken {
