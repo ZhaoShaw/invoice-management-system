@@ -18,6 +18,11 @@ export default function UserSettingPage() {
   const table = useReactTable({
     data: users.data ?? [],
     columns,
+    meta: {
+      refetchData: async () => {
+        await users.refetch();
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),

@@ -7,7 +7,29 @@ import {
 } from "~/server/api/trpc";
 import { UserRole } from "~/types/index.d";
 import { env } from "~/env";
-import { newUserSchema } from "~/lib/verification";
+import { newUserSchema, setUserStatusSchema } from "~/lib/verification";
+import { db } from "~/server/db";
+import { UserStatus } from "~/types/index.d";
+
+const clearVerification = async ({
+  userId,
+  identifier,
+}: {
+  userId: string;
+  identifier: string | null;
+}) => {
+  await db.session.deleteMany({
+    where: { userId: userId },
+  });
+
+  if (identifier) {
+    await db.verificationToken.deleteMany({
+      where: {
+        identifier: identifier,
+      },
+    });
+  }
+};
 
 export const userRouter = createTRPCRouter({
   setRole: publicProcedure
@@ -70,17 +92,38 @@ export const userRouter = createTRPCRouter({
           email: input.email,
         },
       });
-      await ctx.db.session.deleteMany({
-        where: { userId: input.id },
+      await clearVerification({ userId: input.id, identifier: previous.email });
+    }),
+
+  setUserStatus: adminProcedure
+    .input(setUserStatusSchema)
+    .mutation(async ({ ctx, input }) => {
+      const previous = await ctx.db.user.findFirst({
+        where: {
+          id: input.id,
+        },
       });
-      if (!previous.email) {
-        await ctx.db.verificationToken.deleteMany({
-          where: {
-            identifier: previous.email!,
-          },
+
+      if (!previous) {
+        return;
+      }
+      await ctx.db.user.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+        },
+      });
+
+      if (input.status === UserStatus.FORBIDDEN) {
+        await clearVerification({
+          userId: input.id,
+          identifier: previous.email,
         });
       }
     }),
+
   getUserBySessionToken: protectedProcedure
     .input(
       z.object({

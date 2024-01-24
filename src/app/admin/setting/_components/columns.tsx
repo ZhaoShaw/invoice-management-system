@@ -19,7 +19,12 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div>{row.getValue("email")}</div>,
   },
   {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => <div>{row.getValue("status")}</div>,
+  },
+  {
     id: "actions",
-    cell: ({ row }) => <UserSettingActions />,
+    cell: ({ table, row }) => <UserSettingActions table={table} row={row} />,
   },
 ];

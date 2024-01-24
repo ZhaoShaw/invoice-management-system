@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { InvoiceGroupPurpose } from "~/types/index.d";
+import { InvoiceGroupPurpose, UserStatus } from "~/types/index.d";
 
 export const invoiceItemSchema = z.object({
   id: z.string().min(1).nullable(),
@@ -34,4 +34,9 @@ export const newUserSchema = z.object({
   email: z.string().email({
     message: "Must be a valid email",
   }),
+});
+
+export const setUserStatusSchema = z.object({
+  id: z.string().min(1),
+  status: z.nativeEnum(UserStatus),
 });

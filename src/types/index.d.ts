@@ -27,6 +27,11 @@ export enum InvoiceGroupPurpose {
   OTHER = "OTHER",
 }
 
+export enum UserStatus {
+  ALLOW = "ALLOW",
+  FORBIDDEN = "FORBIDDEN",
+}
+
 export type InvoiceCommit = z.infer<typeof invoiceCommitSchema>;
 
 export type InvoiceGroup = z.infer<typeof invoiceGroupSchema>;

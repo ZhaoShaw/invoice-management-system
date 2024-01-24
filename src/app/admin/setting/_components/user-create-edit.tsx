@@ -17,8 +17,10 @@ import { newUserSchema } from "~/lib/verification";
 import { useState } from "react";
 
 export function UserCreateEdit({
+  children,
   userId = undefined,
 }: {
+  children: React.ReactNode;
   userId?: string | undefined;
 }) {
   const isAddMode = !userId;
@@ -28,7 +30,7 @@ export function UserCreateEdit({
     resolver: zodResolver(newUserSchema),
   });
 
-  const common = {
+  const commonMutationProcess = {
     onSuccess() {
       toast({
         description: "Success",
@@ -42,8 +44,8 @@ export function UserCreateEdit({
       setOpen(false);
     },
   };
-  const createUser = api.user.createUser.useMutation(common);
-  const editUser = api.user.updateUser.useMutation(common);
+  const createUser = api.user.createUser.useMutation(commonMutationProcess);
+  const editUser = api.user.updateUser.useMutation(commonMutationProcess);
   function onSubmit(values: NewUser) {
     createUser.mutate(values);
     if (isAddMode) {
@@ -55,6 +57,7 @@ export function UserCreateEdit({
   return (
     <div>
       <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>{children}</SheetTrigger>
         <SheetContent>
           <Form {...form}>
             <form
