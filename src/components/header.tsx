@@ -62,12 +62,15 @@ export function Header({ isInAdmin = false, user }: Props) {
                     )}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    {isInAdmin && (
-                      <Link href="/admin/setting/user">Setting</Link>
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+
+                  {isInAdmin && (
+                    <div>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/setting/user">Setting</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </div>
+                  )}
                 </div>
               )}
 
