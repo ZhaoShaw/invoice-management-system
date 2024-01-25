@@ -16,22 +16,23 @@ import { UserStatus } from "~/types/index.d";
 import { useRef } from "react";
 
 interface UserSettingActionsProps<TData> {
-  table: Table<TData>;
   row: Row<TData>;
+  refetchData: () => Promise<void>;
 }
 
 export default function UserSettingActions<TData>({
-  table,
   row,
+  refetchData,
 }: UserSettingActionsProps<TData>) {
   const userRef = useRef(null);
-  const meta = table.options.meta;
   const userId: string = row.getValue("id");
+  const userName: string = row.getValue("name");
+  const userEmail: string = row.getValue("email");
   const userStatus: UserStatus = row.getValue("status");
   const { toast } = useToast();
   const setUserStatus = api.user.setUserStatus.useMutation({
     async onSuccess() {
-      await meta?.refetchData();
+      await refetchData();
       toast({
         description: "Success",
       });
@@ -61,6 +62,9 @@ export default function UserSettingActions<TData>({
                 </Button>
               }
               userId={userId}
+              userName={userName}
+              userEmail={userEmail}
+              refetchData={refetchData}
             />
           </DropdownMenuItem>
           <DropdownMenuSeparator />

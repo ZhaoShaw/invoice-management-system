@@ -30,7 +30,7 @@ export default function UserSettingPage() {
   });
   return (
     <div>
-      <UserSettingTableToolbar />
+      <UserSettingTableToolbar table={table} />
       <TableList table={table} columns={columns} />
       <TablePagination table={table} />
     </div>

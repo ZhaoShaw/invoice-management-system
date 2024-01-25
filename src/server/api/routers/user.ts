@@ -59,7 +59,7 @@ export const userRouter = createTRPCRouter({
   createUser: adminProcedure
     .input(newUserSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.user.create({
+      return await ctx.db.user.create({
         data: {
           name: input.name,
           email: input.email,
@@ -73,7 +73,6 @@ export const userRouter = createTRPCRouter({
       if (!input.id) {
         return;
       }
-
       const previous = await ctx.db.user.findFirst({
         where: {
           id: input.id,
@@ -139,6 +138,10 @@ export const userRouter = createTRPCRouter({
     }),
 
   getAllUsers: adminProcedure.query(async ({ ctx }) => {
-    return await ctx.db.user.findMany({});
+    return await ctx.db.user.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
   }),
 });

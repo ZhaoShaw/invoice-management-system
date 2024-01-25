@@ -15,16 +15,23 @@ import { type NewUser } from "~/types/index.d";
 
 import { newUserSchema } from "~/lib/verification";
 import { useState, forwardRef } from "react";
+interface UserCreateEditProps {
+  children: React.ReactNode;
+  userId?: string | undefined;
+  userName?: string | undefined;
+  userEmail?: string | undefined;
+  refetchData: () => Promise<void>;
+}
 
 export const UserCreateEdit = forwardRef(
   (
     {
       children,
       userId = undefined,
-    }: {
-      children: React.ReactNode;
-      userId?: string | undefined;
-    },
+      userName = "",
+      userEmail = "",
+      refetchData,
+    }: UserCreateEditProps,
     ref,
   ) => {
     const isAddMode = !userId;
@@ -32,10 +39,17 @@ export const UserCreateEdit = forwardRef(
     const [open, setOpen] = useState(false);
     const form = useForm<NewUser>({
       resolver: zodResolver(newUserSchema),
+      defaultValues: {
+        name: userName,
+        email: userEmail,
+      },
     });
 
     const commonMutationProcess = {
-      onSuccess() {
+      async onSuccess() {
+        await refetchData();
+        form.setValue("name", "");
+        form.setValue("email", "");
         toast({
           description: "Success",
         });
@@ -51,10 +65,10 @@ export const UserCreateEdit = forwardRef(
     const createUser = api.user.createUser.useMutation(commonMutationProcess);
     const editUser = api.user.updateUser.useMutation(commonMutationProcess);
     function onSubmit(values: NewUser) {
-      createUser.mutate(values);
       if (isAddMode) {
         createUser.mutate(values);
       } else {
+        values.id = userId;
         editUser.mutate(values);
       }
     }
@@ -75,7 +89,7 @@ export const UserCreateEdit = forwardRef(
                     <FormItem>
                       <Label>Name</Label>
                       <FormControl>
-                        <Input placeholder="" {...field} />
+                        <Input placeholder="" autoFocus={false} {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -87,7 +101,7 @@ export const UserCreateEdit = forwardRef(
                     <FormItem>
                       <Label>Email</Label>
                       <FormControl>
-                        <Input placeholder="" {...field} />
+                        <Input placeholder="" autoFocus={false} {...field} />
                       </FormControl>
                     </FormItem>
                   )}

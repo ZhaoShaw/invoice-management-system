@@ -25,6 +25,11 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "actions",
-    cell: ({ table, row }) => <UserSettingActions table={table} row={row} />,
+    cell: ({ table, row }) => (
+      <UserSettingActions
+        row={row}
+        refetchData={table.options.meta.refetchData}
+      />
+    ),
   },
 ];
