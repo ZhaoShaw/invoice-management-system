@@ -13,6 +13,7 @@ import { type Table, type Row } from "@tanstack/react-table";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
 import { UserStatus } from "~/types/index.d";
+import { useRef } from "react";
 
 interface UserSettingActionsProps<TData> {
   table: Table<TData>;
@@ -23,6 +24,7 @@ export default function UserSettingActions<TData>({
   table,
   row,
 }: UserSettingActionsProps<TData>) {
+  const userRef = useRef(null);
   const meta = table.options.meta;
   const userId: string = row.getValue("id");
   const userStatus: UserStatus = row.getValue("status");
@@ -52,6 +54,7 @@ export default function UserSettingActions<TData>({
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <UserCreateEdit
+              ref={userRef}
               children={
                 <Button variant="ghost" type="button">
                   Edit
