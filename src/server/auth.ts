@@ -8,7 +8,7 @@ import {
 import EmailProvider from "next-auth/providers/email";
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { type UserRole } from "~/types";
+import { UserStatus, type UserRole } from "~/types/index.d";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -23,6 +23,7 @@ declare module "next-auth" {
       // ...other properties
       name: string;
       role: UserRole;
+      status: UserStatus;
     } & DefaultSession["user"];
   }
 
@@ -30,6 +31,7 @@ declare module "next-auth" {
     // ...other properties
     name: string;
     role: UserRole;
+    status: UserStatus;
   }
 }
 
@@ -40,6 +42,13 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    async signIn({ user }) {
+      if (user.status === UserStatus.FORBIDDEN) {
+        return false;
+      } else {
+        return true;
+      }
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
