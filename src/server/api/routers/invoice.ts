@@ -4,9 +4,10 @@ import {
   createTRPCRouter,
   protectedProcedure,
   adminProcedure,
+  publicProcedure,
 } from "~/server/api/trpc";
 import { invoiceCommitSchema } from "~/lib/verification";
-import { formatISO, format } from "date-fns";
+import { formatISO, format, subDays } from "date-fns";
 import fs from "fs";
 import { without } from "lodash";
 import { getTodayUploadFiles } from "~/lib/func";
@@ -266,6 +267,7 @@ export const invoiceRouter = createTRPCRouter({
         },
         select: {
           commitStatus: true,
+          isExpired: true,
         },
       });
     }),
@@ -379,4 +381,17 @@ export const invoiceRouter = createTRPCRouter({
         },
       });
     }),
+
+  setCommitExpired: publicProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.invoiceCommit.updateMany({
+      data: {
+        isExpired: true,
+      },
+      where: {
+        updatedAt: {
+          lte: formatISO(subDays(Date.now(), 30)),
+        },
+      },
+    });
+  }),
 });

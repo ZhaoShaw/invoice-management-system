@@ -10,7 +10,9 @@ export default function EditPage({ params }: { params: { id: string } }) {
   }
   let isLockMode = false;
   if (status.isSuccess) {
-    isLockMode = status.data.commitStatus !== CommitStatus.NOTREVIEWED;
+    isLockMode =
+      status.data.commitStatus !== CommitStatus.NOTREVIEWED ||
+      status.data.isExpired;
     return <CreateEdit commitId={params.id} isLockMode={isLockMode} />;
   }
 }

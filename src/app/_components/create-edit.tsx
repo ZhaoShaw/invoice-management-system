@@ -48,10 +48,12 @@ type InvoiceItemDrag = {
 export default function CreateEdit({
   isLockMode = false,
   isInAdmin = false,
+  isExpired = false,
   commitId = undefined,
 }: {
   isLockMode?: boolean;
   isInAdmin?: boolean;
+  isExpired?: boolean;
   commitId?: string | undefined;
 }) {
   const isAddMode = !commitId;
@@ -460,7 +462,7 @@ export default function CreateEdit({
             </Button>
           )}
 
-          {isInAdmin && (
+          {!isExpired && isInAdmin && (
             <div className="fixed inset-x-0 bottom-0 flex justify-center space-x-10 bg-red-100">
               <Button type="button" onClick={handleApprove}>
                 Approve

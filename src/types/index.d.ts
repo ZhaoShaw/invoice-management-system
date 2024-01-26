@@ -18,7 +18,6 @@ export enum AuthStage {
 export enum CommitStatus {
   NOTREVIEWED = "NOTREVIEWED",
   REVIEWED = "REVIEWED",
-  EXPIRED = "EXPIRED",
 }
 
 export enum InvoiceGroupPurpose {

@@ -32,9 +32,11 @@ export const columns: ColumnDef<InvoiceCommitTable>[] = [
   },
   {
     accessorKey: "commitStatus",
+    accessorFn: (row) =>
+      `${row.commitStatus} ${row.isExpired ? "(Expired)" : ""}`,
     header: "Commit Status",
     cell: ({ row }) => {
-      const status: CommitStatus = row.getValue("commitStatus");
+      const status: string = row.getValue("commitStatus");
       return <div>{status}</div>;
     },
   },
