@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { eachMonthOfInterval, format, formatISO, setDate } from "date-fns";
 import fs from "fs";
 import { without } from "lodash";
 
@@ -28,3 +28,22 @@ export function getTodayUploadFiles(
     return [];
   }
 }
+
+export const generateDateArray = (
+  startDate: Date,
+  endDate: Date,
+  period: number,
+) => {
+  const res = eachMonthOfInterval(
+    {
+      start: startDate,
+      end: endDate,
+    },
+    { step: period },
+  ).map((d) => formatISO(setDate(d, startDate.getDate())));
+  const newArr = [];
+  for (let i = 0; i < res.length - 1; i++) {
+    newArr.push({ startAt: res[i]!, endAt: res[i + 1]! });
+  }
+  return newArr;
+};

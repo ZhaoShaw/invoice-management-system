@@ -40,3 +40,8 @@ export const setUserStatusSchema = z.object({
   id: z.string().min(1),
   status: z.nativeEnum(UserStatus),
 });
+
+export const newPeriodSchema = z.object({
+  changeDate: z.date().min(new Date(), { message: "Can't be setted" }),
+  period: z.coerce.number().int().gte(1).lte(12),
+});

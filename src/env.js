@@ -41,8 +41,6 @@ export const env = createEnv({
     INVOICE_END_DAY: z.coerce.number(),
     INVOICE_END_MONTH: z.coerce.number(),
     INVOICE_END_YEAR: z.coerce.number(),
-    INVOICE_CHANGE_MONTH: z.coerce.number(),
-    INVOICE_CHANGE_DAY: z.coerce.number(),
   },
 
   /**
@@ -76,8 +74,6 @@ export const env = createEnv({
     INVOICE_END_DAY: process.env.INVOICE_END_DAY,
     INVOICE_END_MONTH: process.env.INVOICE_END_MONTH,
     INVOICE_END_YEAR: process.env.INVOICE_END_YEAR,
-    INVOICE_CHANGE_MONTH: process.env.INVOICE_CHANGE_MONTH,
-    INVOICE_CHANGE_DAY: process.env.INVOICE_CHANGE_DAY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

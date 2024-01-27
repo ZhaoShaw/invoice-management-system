@@ -2,6 +2,7 @@ import {
   type invoiceCommitSchema,
   type invoiceGroupSchema,
   type newUserSchema,
+  type newPeriodSchema,
 } from "~/lib/verification";
 import type * as z from "zod";
 
@@ -36,3 +37,5 @@ export type InvoiceCommit = z.infer<typeof invoiceCommitSchema>;
 export type InvoiceGroup = z.infer<typeof invoiceGroupSchema>;
 
 export type NewUser = z.infer<typeof newUserSchema>;
+
+export type NewPeriod = z.infer<typeof newPeriodSchema>;
