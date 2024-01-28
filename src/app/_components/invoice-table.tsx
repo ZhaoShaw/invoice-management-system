@@ -21,12 +21,14 @@ interface InvoiceTableProps<TData, TValue> {
   refetch?: () => Promise<UseQueryResult>;
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
+  isAdmin?: boolean;
 }
 
 export function InvoiceTable<TData, TValue>({
   refetch,
   data,
   columns,
+  isAdmin = false,
 }: InvoiceTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -52,7 +54,7 @@ export function InvoiceTable<TData, TValue>({
 
   return (
     <div>
-      <TableToolbar table={table} />
+      <TableToolbar table={table} isAdmin={isAdmin} />
       <TableList table={table} columns={columns} />
       <TablePagination table={table} />
     </div>

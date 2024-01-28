@@ -10,18 +10,34 @@ import { subDays, format } from "date-fns";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { type Table } from "@tanstack/react-table";
+import { Input } from "~/components/ui/input";
 
 interface TableToolbarProps<TData> {
   table: Table<TData>;
+  isAdmin?: boolean;
 }
 
-export function TableToolbar<TData>({ table }: TableToolbarProps<TData>) {
+export function TableToolbar<TData>({
+  table,
+  isAdmin = false,
+}: TableToolbarProps<TData>) {
   const [date, setDate] = useState<DateRange | undefined>({
     from: subDays(Date.now(), 30),
     to: new Date(Date.now()),
   });
   return (
     <div>
+      {isAdmin && (
+        <Input
+          placeholder="Enter Name"
+          value={
+            (table.getColumn("updatedBy")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) => {
+            table.getColumn("updatedBy")?.setFilterValue(event.target.value);
+          }}
+        />
+      )}
       <Popover>
         <PopoverTrigger asChild>
           <Button id="date" variant={"outline"}>

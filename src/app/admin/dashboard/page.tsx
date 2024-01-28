@@ -14,6 +14,7 @@ export default function AdminDashboard() {
       data={invoiceList.data}
       columns={adminColumns}
       refetch={invoiceList.refetch}
+      isAdmin={true}
     />
   );
 }
