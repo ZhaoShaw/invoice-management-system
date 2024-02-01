@@ -6,27 +6,76 @@ import {
 } from "~/components/ui/popover";
 import { Calendar } from "~/components/ui/calendar";
 import { type DateRange } from "react-day-picker";
-import { subDays, format } from "date-fns";
-import { useState } from "react";
+import { subDays, format, formatISO } from "date-fns";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { type Table } from "@tanstack/react-table";
 import { Input } from "~/components/ui/input";
+import { api } from "~/trpc/react";
 
 interface TableToolbarProps<TData> {
   table: Table<TData>;
   isAdmin?: boolean;
 }
 
+interface PeriodNow {
+  startAt: Date | null;
+  endAt: Date | null;
+}
+
 export function TableToolbar<TData>({
   table,
   isAdmin = false,
 }: TableToolbarProps<TData>) {
+  const now = formatISO(Date.now());
   const [date, setDate] = useState<DateRange | undefined>({
     from: subDays(Date.now(), 30),
     to: new Date(Date.now()),
   });
+
+  const [periodNowState, setPeriodNowState] = useState<PeriodNow>({
+    startAt: null,
+    endAt: null,
+  });
+
+  const periodNow = api.period.getPeriodByDate.useQuery(new Date(now), {
+    enabled: false,
+  });
+
+  const getPeriodNow = async () => {
+    const resNow = await periodNow.refetch();
+    if (resNow.data) {
+      setPeriodNowState(resNow.data);
+    }
+  };
+
+  useEffect(() => {
+    getPeriodNow().catch(console.error);
+  }, []);
+
+  const handleSetPeriodNow = () => {
+    const period: DateRange = {
+      from: periodNowState.startAt!,
+      to: periodNowState.endAt!,
+    };
+    setDate(period);
+    table.getColumn("updatedAt")?.setFilterValue(period);
+  };
   return (
     <div>
+      <div>
+        <div>
+          {"Period Now: "}
+          {periodNowState.startAt
+            ? periodNowState.startAt.toLocaleDateString()
+            : ""}
+          -
+          {periodNowState.endAt
+            ? periodNowState.endAt.toLocaleDateString()
+            : ""}
+        </div>
+        <Button onClick={handleSetPeriodNow}>View Period Now</Button>
+      </div>
       {isAdmin && (
         <Input
           placeholder="Enter Name"
