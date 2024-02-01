@@ -8,6 +8,7 @@ import {
 import EmailProvider from "next-auth/providers/email";
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 import { UserStatus, type UserRole } from "~/types/index.d";
 
 /**
@@ -43,7 +44,9 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
-      if (user.status === UserStatus.FORBIDDEN) {
+      const allowUser = await api.user.isUser.query(user.email!);
+
+      if (user.status === UserStatus.FORBIDDEN || !allowUser) {
         return false;
       } else {
         return true;

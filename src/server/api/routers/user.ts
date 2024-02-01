@@ -144,4 +144,15 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
+
+  isUser: publicProcedure
+    .input(z.string().email())
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findFirst({
+        where: {
+          email: input,
+        },
+      });
+      return user ? true : false;
+    }),
 });
