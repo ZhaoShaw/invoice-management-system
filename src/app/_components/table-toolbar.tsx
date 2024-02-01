@@ -12,6 +12,8 @@ import { Button } from "~/components/ui/button";
 import { type Table } from "@tanstack/react-table";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
+import b64ToBlob from "b64-to-blob";
+import saveAs from "file-saver";
 
 interface TableToolbarProps<TData> {
   table: Table<TData>;
@@ -60,6 +62,30 @@ export function TableToolbar<TData>({
     };
     setDate(period);
     table.getColumn("updatedAt")?.setFilterValue(period);
+  };
+
+  const exportFilter = async () => {
+    const res = await fetch(
+      `/api/download/filter?` +
+        new URLSearchParams({
+          type: "filter",
+          userName: table.getColumn("updatedBy")?.getFilterValue()
+            ? (table.getColumn("updatedBy")?.getFilterValue() as string)
+            : "",
+          startDate:
+            date?.from?.toLocaleDateString() ??
+            subDays(Date.now(), 30).toLocaleDateString(),
+          endDate:
+            date?.to?.toLocaleDateString() ??
+            new Date(Date.now()).toLocaleDateString(),
+        }).toString(),
+      {
+        method: "get",
+      },
+    );
+    const zipAsBase64 = await res.text();
+    const blob = b64ToBlob(zipAsBase64, "application/zip");
+    saveAs(blob, "filter");
   };
   return (
     <div>
@@ -122,6 +148,9 @@ export function TableToolbar<TData>({
       <Button asChild>
         <Link href="/invoices/create">Create Commit</Link>
       </Button>
+      {isAdmin && (
+        <Button onClick={exportFilter}>Export Filter Invoices</Button>
+      )}
     </div>
   );
 }

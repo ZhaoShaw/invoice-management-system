@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  UserRole,
-  CommitStatus,
-  type GetInvoiceCommits,
-} from "~/types/index.d";
+import { CommitStatus, type GetInvoiceCommits } from "~/types/index.d";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -14,10 +10,10 @@ import {
   getInvoiceCommitsSchema,
   invoiceCommitSchema,
 } from "~/lib/verification";
-import { formatISO, format, subDays } from "date-fns";
+import { formatISO, subDays } from "date-fns";
 import { without } from "lodash";
 import { getTodayUploadFiles } from "~/lib/func";
-import type { InvoiceItem, PrismaClient, User } from "@prisma/client/index.d";
+import type { InvoiceItem, PrismaClient } from "@prisma/client/index.d";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isString = (s: any): s is string => typeof s === "string";
