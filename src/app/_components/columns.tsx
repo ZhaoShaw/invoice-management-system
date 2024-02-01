@@ -1,5 +1,4 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { type CommitStatus } from "~/types/index.d";
 import type { InvoiceCommit } from "@prisma/client/index.d";
 import { type DateRange } from "react-day-picker";
 import { UserTableRowActions } from "./user-table-row-actions";
@@ -41,6 +40,7 @@ export const columns: ColumnDef<InvoiceCommitTable>[] = [
     },
   },
   {
+    id: "updatedAt",
     accessorKey: "updatedAt",
     header: "Update Date",
     cell: ({ row }) => {
@@ -68,6 +68,7 @@ export const userColumns = columns.concat({
 
 export const adminColumns = columns.concat([
   {
+    id: "updatedBy",
     accessorKey: "updatedBy",
     header: "User",
     cell: ({ row }) => <div>{row.getValue("updatedBy")}</div>,

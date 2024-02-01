@@ -45,3 +45,12 @@ export const newPeriodSchema = z.object({
   changeDate: z.date().min(new Date(), { message: "Can't be setted" }),
   period: z.coerce.number().int().gte(1).lte(12),
 });
+
+export const getInvoiceCommitsSchema = z.object({
+  userId: z.string().min(1).optional(),
+  userName: z.string().optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  pageIndex: z.number().int().gte(0),
+  pageSize: z.number().int().gte(1),
+});

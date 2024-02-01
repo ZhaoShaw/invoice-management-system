@@ -1,20 +1,108 @@
 import { z } from "zod";
-import { UserRole, CommitStatus } from "~/types/index.d";
+import {
+  UserRole,
+  CommitStatus,
+  type GetInvoiceCommits,
+} from "~/types/index.d";
 import {
   createTRPCRouter,
   protectedProcedure,
   adminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { invoiceCommitSchema } from "~/lib/verification";
+import {
+  getInvoiceCommitsSchema,
+  invoiceCommitSchema,
+} from "~/lib/verification";
 import { formatISO, format, subDays } from "date-fns";
-import fs from "fs";
 import { without } from "lodash";
 import { getTodayUploadFiles } from "~/lib/func";
-import type { InvoiceItem } from "@prisma/client/index.d";
+import type { InvoiceItem, PrismaClient, User } from "@prisma/client/index.d";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isString = (s: any): s is string => typeof s === "string";
+
+interface GetInvoiceCommitsProps extends GetInvoiceCommits {
+  db: PrismaClient;
+}
+
+const getInvoiceCommits = async ({
+  db,
+  userId,
+  userName,
+  startDate,
+  endDate,
+  pageIndex,
+  pageSize,
+}: GetInvoiceCommitsProps) => {
+  let ids: string[] = [];
+  if (userId) {
+    ids = [userId];
+  } else {
+    const users = await db.user.findMany({
+      where: {
+        name: {
+          contains: userName,
+          mode: "insensitive",
+        },
+      },
+    });
+    ids = users.map((u) => u.id);
+  }
+
+  const totalCount = await db.invoiceCommit.count({
+    where: {
+      AND: [
+        { updatedUesrId: { in: ids } },
+        {
+          updatedAt: {
+            gte: startDate,
+          },
+        },
+        {
+          updatedAt: {
+            lte: endDate,
+          },
+        },
+      ],
+    },
+  });
+  const invoices = await db.invoiceCommit.findMany({
+    skip: pageIndex * pageSize,
+    take: pageSize,
+    orderBy: {
+      updatedAt: "desc",
+    },
+    where: {
+      AND: [
+        { updatedUesrId: { in: ids } },
+        {
+          updatedAt: {
+            gte: startDate,
+          },
+        },
+        {
+          updatedAt: {
+            lte: endDate,
+          },
+        },
+      ],
+    },
+    include: {
+      updatedBy: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+  return {
+    rows: invoices.map((i) => {
+      return { ...i, updatedBy: i.updatedBy.name! };
+    }),
+    pageCount: Math.ceil(totalCount / pageSize),
+  };
+};
 
 export const invoiceRouter = createTRPCRouter({
   create: protectedProcedure
@@ -272,34 +360,31 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
-  getInvoiceCommitListByUser: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.invoiceCommit.findMany({
-      where: {
-        createdBy: { id: ctx.session.user.id },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
-  }),
+  getInvoiceCommitListByUser: protectedProcedure
+    .input(getInvoiceCommitsSchema)
+    .query(async ({ ctx, input }) => {
+      return getInvoiceCommits({
+        db: ctx.db,
+        userId: ctx.session.user.id,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        pageIndex: input.pageIndex,
+        pageSize: input.pageSize,
+      });
+    }),
 
-  getInvoiceCommitList: adminProcedure.query(async ({ ctx }) => {
-    const invoices = await ctx.db.invoiceCommit.findMany({
-      orderBy: {
-        updatedAt: "desc",
-      },
-      include: {
-        updatedBy: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-    return invoices.map((i) => {
-      return { ...i, updatedBy: i.updatedBy.name! };
-    });
-  }),
+  getInvoiceCommitList: adminProcedure
+    .input(getInvoiceCommitsSchema)
+    .query(async ({ ctx, input }) => {
+      return getInvoiceCommits({
+        db: ctx.db,
+        userName: input.userName,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        pageIndex: input.pageIndex,
+        pageSize: input.pageSize,
+      });
+    }),
 
   getInvoiceSrcListByCommitId: protectedProcedure
     .input(z.string().min(1))
