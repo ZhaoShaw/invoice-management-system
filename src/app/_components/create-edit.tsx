@@ -18,6 +18,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
+
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerTrigger,
+} from "~/components/ui/drawer";
+
 import { Input } from "~/components/ui/input";
 import {
   type InvoiceCommit,
@@ -25,7 +42,6 @@ import {
   InvoiceGroup,
 } from "~/types/index.d";
 import { invoiceCommitSchema } from "~/lib/verification";
-import Icon from "~/components/icon";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
 import { useEffect, useState } from "react";
@@ -38,6 +54,8 @@ import {
 } from "react-beautiful-dnd";
 import { useRouter } from "next/navigation";
 import _ from "lodash";
+import { XCircle, FolderClosed } from "lucide-react";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 type InvoiceItemDrag = {
   id: string | null;
@@ -64,6 +82,20 @@ export default function CreateEdit({
   const [invoiceItemsMap, setInvoiceItemsMap] = useState<
     Map<string, InvoiceItemDrag[]>
   >(new Map([["ROOTITEMS", []]]));
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    setCurrent(carouselApi.selectedScrollSnap() + 1);
+
+    carouselApi.on("select", () => {
+      setCurrent(carouselApi.selectedScrollSnap() + 1);
+    });
+  }, [carouselApi]);
 
   const updateMap = (k: string, v: InvoiceItemDrag[]) => {
     setInvoiceItemsMap(new Map(invoiceItemsMap.set(k, v)));
@@ -298,6 +330,7 @@ export default function CreateEdit({
                   <Droppable
                     key={`GROUP${index}`}
                     droppableId={`GROUP${index}`}
+                    direction="horizontal"
                   >
                     {(provided, snapshot) => (
                       <section
@@ -361,7 +394,7 @@ export default function CreateEdit({
                                 removeGroupInvoiceItems(index);
                               }}
                             >
-                              <Icon name="x-circle" />
+                              <XCircle />
                             </Button>
                           )}
                           <Button
@@ -372,8 +405,8 @@ export default function CreateEdit({
                               setSelectGroup(`GROUP${index}`);
                             }}
                           >
-                            <Icon name="folder-closed" />
-                            {invoiceItemsMap.get(`GROUP${index}`)?.length}
+                            <FolderClosed />
+                            {invoiceItemsMap.get(`GROUP${index}`)?.length ?? 0}
                           </Button>
                         </div>
                         <div className="hidden">{provided.placeholder}</div>
@@ -420,43 +453,136 @@ export default function CreateEdit({
                   accept=".pdf,.png,.jpeg,.jpg "
                 />
               )}
-              <Droppable droppableId={selectGroup}>
-                {(provided, snapshot) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {invoiceItemsMap.get(selectGroup).map((i, index) => {
-                      return (
-                        <Draggable
-                          key={i.dragId}
-                          draggableId={i.dragId}
-                          index={index}
-                          isDragDisabled={isLockMode}
-                        >
-                          {(provided, snapshot) => {
-                            return (
-                              <Image
-                                src={i.src}
-                                alt="1"
-                                width={300}
-                                height={300}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              />
-                            );
-                          }}
-                        </Draggable>
-                      );
-                    })}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
+              <Carousel setApi={setCarouselApi}>
+                <div className="my-4 flex w-full justify-center space-x-6">
+                  <CarouselPrevious
+                    className="relative inset-0 translate-y-0"
+                    type="button"
+                  />
+                  <CarouselNext
+                    className="relative inset-0 translate-y-0"
+                    type="button"
+                  />
+                </div>
+                <Droppable
+                  droppableId={selectGroup}
+                  direction="horizontal"
+                  renderClone={(provided, snapshot, rubric) => (
+                    <div
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      style={{
+                        ...provided.draggableProps.style,
+                        height: snapshot.isDragging ? "50px" : "auto",
+                        width: snapshot.isDragging ? "50px" : "auto",
+                        top: "40vh",
+                        left: "60vw",
+                      }}
+                    >
+                      <Image
+                        src={
+                          invoiceItemsMap.get(selectGroup)[rubric.source.index]
+                            .src
+                        }
+                        alt="1"
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                        }}
+                      />
+                    </div>
+                  )}
+                >
+                  {(provided, snapshot) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      <CarouselContent>
+                        {invoiceItemsMap.get(selectGroup)?.map((i, index) => {
+                          return (
+                            <CarouselItem className="relative">
+                              <Draggable
+                                key={i.dragId}
+                                draggableId={i.dragId}
+                                index={index}
+                                isDragDisabled={isLockMode}
+                              >
+                                {(provided, snapshot) => {
+                                  return (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                    >
+                                      <Image
+                                        src={i.src}
+                                        alt="1"
+                                        width={0}
+                                        height={0}
+                                        sizes="100vw"
+                                        style={{
+                                          width: "100%",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                }}
+                              </Draggable>
+                            </CarouselItem>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </CarouselContent>
+                    </div>
+                  )}
+                </Droppable>
+              </Carousel>
             </div>
           </DragDropContext>
+
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button
+                className="fixed bottom-10 right-0 opacity-80"
+                variant="outline"
+              >
+                Zoom in
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <ScrollArea className="h-[70vh]  rounded-md ">
+                <div className="flex justify-center">
+                  <Image
+                    src={invoiceItemsMap.get(selectGroup)[current - 1]?.src}
+                    alt="1"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                    }}
+                  />
+                </div>
+              </ScrollArea>
+              <DrawerFooter>
+                <DrawerClose>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+
           {!isLockMode && !isInAdmin && (
             <Button
               className="fixed inset-x-0 bottom-0 bg-red-100"
               type="submit"
+              disabled={form.formState.isSubmitting}
             >
               Submit
             </Button>

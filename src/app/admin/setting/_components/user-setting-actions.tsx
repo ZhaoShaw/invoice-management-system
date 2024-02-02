@@ -1,4 +1,3 @@
-import Icon from "~/components/icon";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
 import { UserStatus } from "~/types/index.d";
 import { useRef } from "react";
+import { MoreHorizontal } from "lucide-react";
 
 interface UserSettingActionsProps<TData> {
   row: Row<TData>;
@@ -48,7 +48,7 @@ export default function UserSettingActions<TData>({
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Button variant="outline" size="icon" className="h-6 w-6" asChild>
-          <Icon name="more-horizontal" />
+          <MoreHorizontal />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

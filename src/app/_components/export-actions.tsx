@@ -7,7 +7,7 @@ import {
 import b64ToBlob from "b64-to-blob";
 import { saveAs } from "file-saver";
 import { Button } from "~/components/ui/button";
-import Icon from "~/components/icon";
+import { FolderInput } from "lucide-react";
 export function ExportActions({ commitId }: { commitId: string }) {
   const fetchZipFiles = async (
     commitId: string,
@@ -41,7 +41,7 @@ export function ExportActions({ commitId }: { commitId: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
-          <Icon name="folder-input" />
+          <FolderInput />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

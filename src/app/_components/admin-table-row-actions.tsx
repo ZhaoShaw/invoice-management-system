@@ -1,9 +1,9 @@
 import { type Row } from "@tanstack/react-table";
 import { Button } from "~/components/ui/button";
-import Icon from "~/components/icon";
 
 import { useRouter } from "next/navigation";
 import { ExportActions } from "./export-actions";
+import { View } from "lucide-react";
 
 interface TableRowActionsProps<TData> {
   row: Row<TData>;
@@ -23,7 +23,7 @@ export function AdminTableRowActions<TData>({
             router.push(`/admin/invoices/query/${commitId}`);
           }}
         >
-          <Icon name="view" />
+          <View />
         </Button>
         <ExportActions commitId={commitId} />
       </div>

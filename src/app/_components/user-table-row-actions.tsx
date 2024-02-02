@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import Icon from "~/components/icon";
 
 import { useRouter } from "next/navigation";
 
@@ -17,6 +16,7 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
 import { useState } from "react";
 import { ExportActions } from "./export-actions";
+import { XCircle, FileEdit } from "lucide-react";
 
 interface TableRowActionsProps<TData> {
   table: Table<TData>;
@@ -59,7 +59,7 @@ export function UserTableRowActions<TData>({
               router.push(`/invoices/edit/${commitId}`);
             }}
           >
-            <Icon name="file-edit" />
+            <FileEdit />
           </Button>
           <DialogTrigger asChild>
             <Button
@@ -69,7 +69,7 @@ export function UserTableRowActions<TData>({
                 setGroupSelected(commitId);
               }}
             >
-              <Icon name="x-circle" />
+              <XCircle />
             </Button>
           </DialogTrigger>
           <ExportActions commitId={commitId} />

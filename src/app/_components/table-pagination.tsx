@@ -1,5 +1,10 @@
 import { type Table } from "@tanstack/react-table";
-import Icon from "~/components/icon";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 
 interface TablePaginationProps<TData> {
@@ -20,7 +25,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
-          <Icon name="chevrons-left"></Icon>
+          <ChevronsLeft />
         </Button>
         <Button
           variant="outline"
@@ -28,7 +33,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          <Icon name="chevron-left"></Icon>
+          <ChevronLeft />
         </Button>
         <Button
           variant="outline"
@@ -36,7 +41,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          <Icon name="chevron-right"></Icon>
+          <ChevronRight />
         </Button>
         <Button
           variant="outline"
@@ -44,7 +49,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
-          <Icon name="chevrons-right"></Icon>
+          <ChevronsRight />
         </Button>
       </div>
     </div>
