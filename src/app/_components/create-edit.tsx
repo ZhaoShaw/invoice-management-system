@@ -90,10 +90,10 @@ export default function CreateEdit({
       return;
     }
 
-    setCurrent(carouselApi.selectedScrollSnap() + 1);
+    setCurrent(carouselApi.selectedScrollSnap());
 
     carouselApi.on("select", () => {
-      setCurrent(carouselApi.selectedScrollSnap() + 1);
+      setCurrent(carouselApi.selectedScrollSnap());
     });
   }, [carouselApi]);
 
@@ -555,17 +555,19 @@ export default function CreateEdit({
             <DrawerContent>
               <ScrollArea className="h-[70vh]  rounded-md ">
                 <div className="flex justify-center">
-                  <Image
-                    src={invoiceItemsMap.get(selectGroup)[current - 1]?.src}
-                    alt="1"
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                    }}
-                  />
+                  {invoiceItemsMap.get(selectGroup) && (
+                    <Image
+                      src={invoiceItemsMap.get(selectGroup)[current]?.src}
+                      alt="1"
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                      }}
+                    />
+                  )}
                 </div>
               </ScrollArea>
               <DrawerFooter>
