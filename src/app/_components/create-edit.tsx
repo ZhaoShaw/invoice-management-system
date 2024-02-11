@@ -264,23 +264,23 @@ export default function CreateEdit({
     if (!destination) {
       return;
     }
-    if (destination.droppableId === source.droppableId) {
-      const sourceList = invoiceItemsMap.get(source.droppableId);
-      const [removed] = sourceList?.splice(source.index, 1);
-      sourceList?.splice(destination.index, 0, removed);
-      updateMap(source.droppableId, sourceList);
-    } else {
-      const destinationList = invoiceItemsMap.get(destination.droppableId);
-      const sourceList = invoiceItemsMap.get(source.droppableId);
-      updateMap(
-        destination.droppableId,
-        destinationList?.concat(sourceList[source.index]),
-      );
-      sourceList?.splice(source.index, 1);
-      updateMap(source.droppableId, sourceList);
+    if (destination.droppableId !== source.droppableId) {
+      let sourceDroppableId = source.droppableId;
+      if (source.droppableId.startsWith("SHADOW_")) {
+        sourceDroppableId = source.droppableId.substring(7);
+      }
+      if (destination.droppableId !== sourceDroppableId) {
+        const destinationList = invoiceItemsMap.get(destination.droppableId);
+        const sourceList = invoiceItemsMap.get(sourceDroppableId);
+        updateMap(
+          destination.droppableId,
+          destinationList?.concat(sourceList[source.index]),
+        );
+        sourceList?.splice(source.index, 1);
+        updateMap(sourceDroppableId, sourceList);
+      }
     }
-
-    console.log(invoiceItemsMap);
+    // console.log(invoiceItemsMap);
   }
 
   function removeGroupInvoiceItems(index: number) {
@@ -465,8 +465,9 @@ export default function CreateEdit({
                   />
                 </div>
                 <Droppable
-                  droppableId={selectGroup}
-                  direction="horizontal"
+                  droppableId={`SHADOW_${selectGroup}`}
+                  key={`SHADOW_${selectGroup}`}
+                  direction="vertical"
                   renderClone={(provided, snapshot, rubric) => (
                     <div
                       {...provided.draggableProps}
