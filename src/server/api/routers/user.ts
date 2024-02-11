@@ -32,17 +32,6 @@ const clearVerification = async ({
 };
 
 export const userRouter = createTRPCRouter({
-  setRole: publicProcedure
-    .input(z.object({ role: z.nativeEnum(UserRole) }))
-    .mutation(({ ctx, input }) => {
-      return ctx.db.user.update({
-        where: {
-          email: env.ADMIN_USER_EMAIL,
-        },
-        data: { role: input.role },
-      });
-    }),
-
   setUserName: protectedProcedure
     .input(z.string().min(1))
     .mutation(async ({ ctx, input }) => {

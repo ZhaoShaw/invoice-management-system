@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
-import { UserRoleSwitch } from "~/components/user-role-switch";
 
 export const metadata = {
   title: "Santa",
@@ -20,7 +19,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <TRPCReactProvider cookies={cookies().toString()}>
-          <UserRoleSwitch />
           {children}
         </TRPCReactProvider>
         <Toaster />
